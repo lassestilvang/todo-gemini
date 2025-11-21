@@ -17,6 +17,7 @@ import {
 } from "./ui/collapsible";
 // import { ThemeToggle } from "./theme-toggle"; // Removed ThemeToggle
 import { AddListDialog } from "./add-list-dialog";
+import { AddTaskDialog } from "./add-task-dialog"; // Import AddTaskDialog
 import Link from "next/link";
 import {
   Inbox,
@@ -62,10 +63,12 @@ const Sidebar = () => {
       </div>
 
       <div className="mb-6">
-        <Button className="w-full justify-start mb-2">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add task
-        </Button>
+        <AddTaskDialog>
+          <Button className="w-full justify-start mb-2">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add task
+          </Button>
+        </AddTaskDialog>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -139,17 +142,17 @@ const Sidebar = () => {
         </Collapsible>
 
         <Collapsible defaultOpen>
-          <CollapsibleTrigger className="w-full flex items-center text-sm font-semibold justify-between">
-            <div className="flex items-center">
+          <div className="w-full flex items-center text-sm font-semibold justify-between">
+            <CollapsibleTrigger className="flex items-center">
               <ChevronDown className="mr-2 h-4 w-4" />
               My Projects
-            </div>
+            </CollapsibleTrigger>
             <AddListDialog>
               <Button variant="ghost" size="icon">
                 <Plus className="h-4 w-4" />
               </Button>
             </AddListDialog>
-          </CollapsibleTrigger>
+          </div>
           <CollapsibleContent className="pl-6 space-y-2 mt-2">
             {lists.map((list) => (
               <Link href="#" key={list.id} className="flex items-center text-sm">

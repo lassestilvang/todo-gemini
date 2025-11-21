@@ -44,7 +44,11 @@ export function AddListDialog({ children }: AddListDialogProps) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await addList(values);
-    form.reset(); // Reset form fields
+    form.reset({
+      name: "",
+      color: "#a1a1aa",
+      icon: "📝",
+    }); // Reset form fields with default values
     setOpen(false);
   };
 

@@ -5,12 +5,13 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const awaitedParams = await params;
   const db = await getDb();
-  const task = await db.get("SELECT * FROM tasks WHERE id = ?", params.id);
+  const task = await db.get("SELECT * FROM tasks WHERE id = ?", awaitedParams.id);
   if (!task) {
     return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
-  const history = await db.all("SELECT * FROM task_history WHERE taskId = ? ORDER BY createdAt DESC", params.id);
+  const history = await db.all("SELECT * FROM task_history WHERE taskId = ? ORDER BY createdAt DESC", awaitedParams.id);
   return NextResponse.json({ ...task, history });
 }
 
@@ -18,7 +19,8 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = params;
+  const awaitedParams = await params;
+  const id = awaitedParams.id;
   const data = await request.json();
   const {
     name,
@@ -108,7 +110,8 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const awaitedParams = await params;
   const db = await getDb();
-  await db.run("DELETE FROM tasks WHERE id = ?", params.id);
+  await db.run("DELETE FROM tasks WHERE id = ?", awaitedParams.id);
   return new NextResponse(null, { status: 204 });
 }
