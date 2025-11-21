@@ -63,7 +63,7 @@ const Sidebar = () => {
       </div>
 
       <div className="mb-6">
-        <AddTaskDialog>
+        <AddTaskDialog listId={lists[0]?.id}>
           <Button className="w-full justify-start mb-2">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add task

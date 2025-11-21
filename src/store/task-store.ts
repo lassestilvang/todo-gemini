@@ -11,7 +11,7 @@ interface TaskState {
   fetchNext7DaysTasks: (showCompleted?: boolean) => Promise<void>;
   fetchUpcomingTasks: (showCompleted?: boolean) => Promise<void>;
   searchTasks: (query: string) => Promise<void>; // New function
-  addTask: (newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed' | 'recurring' | 'actualTime' | 'parentId'>) => Promise<void>;
+  addTask: (newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed' | 'recurring' | 'actualTime'>) => Promise<void>;
   updateTask: (taskId: string, updatedTask: Partial<Task>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
 }

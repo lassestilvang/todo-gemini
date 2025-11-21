@@ -38,6 +38,7 @@ const formSchema = z.object({
   description: z.string().nullable(),
   date: z.date().nullable(),
   deadline: z.date().nullable(),
+  reminder: z.string().nullable(), // Added reminder to formSchema
   estimate: z.string().regex(/^\d{2}:\d{2}$/, { message: "Estimate must be in HH:mm format." }),
   priority: z.enum(["NONE", "LOW", "MEDIUM", "HIGH"]),
 });
@@ -59,6 +60,7 @@ export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps
       description: null,
       date: null,
       deadline: null,
+      reminder: null, // Added reminder to defaultValues
       estimate: "00:00",
       priority: "NONE",
     },
@@ -74,6 +76,7 @@ export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps
       listId,
       date: values.date?.toISOString() || null,
       deadline: values.deadline?.toISOString() || null,
+      reminder: values.reminder, // Added reminder
       estimate: estimateInMinutes,
       priority: values.priority,
       parentId: parentId || null,

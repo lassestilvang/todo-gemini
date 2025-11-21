@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(tasks);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
   const {
     name,

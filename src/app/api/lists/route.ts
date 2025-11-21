@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import cuid from "cuid";
 
@@ -8,7 +8,7 @@ export async function GET() {
   return NextResponse.json(lists);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const data = await request.json();
   const { name, color, icon } = data;
   const id = cuid();

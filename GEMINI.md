@@ -1,5 +1,5 @@
 # Project Overview:
-This is a modern, professional daily task planner built with Next.js 14, TypeScript, and Tailwind CSS. It features robust task and list management, an intuitive UI, and adherence to specified technical and design requirements. The application uses a local SQLite database for data persistence, Zustand for state management, and `shadcn/ui` for UI components. Key features include:
+This is a modern, professional daily task planner built with Next.js 16, TypeScript, and Tailwind CSS. It features robust task and list management, an intuitive UI, and adherence to specified technical and design requirements. The application uses a local SQLite database for data persistence, Zustand for state management, and `shadcn/ui` for UI components. Key features include:
 *   **Lists:** Inbox and custom lists with customizable colors and emojis.
 *   **Tasks:** Comprehensive fields including name, description, dates (date, deadline), estimate, priority, completion status, recurring settings, sub-tasks, and history logging.
 *   **Views:** Dedicated views for "Today", "Next 7 Days", "Upcoming", and "All" tasks, with the ability to toggle visibility of completed tasks and highlight overdue tasks.
@@ -7,7 +7,7 @@ This is a modern, professional daily task planner built with Next.js 14, TypeScr
 *   **UI/UX:** Responsive split-view layout (Sidebar + Main panel), minimalistic dark mode with vibrant colors, and light/dark theme switching. Animations are implemented using Framer Motion, and page transitions leverage the View Transition API.
 
 # Technical Stack:
-*   **Framework:** Next.js 14 (App Router)
+*   **Framework:** Next.js 16 (App Router)
 *   **Language:** TypeScript (strict)
 *   **Package Manager:** Bun
 *   **Styling:** Tailwind CSS v4, `shadcn/ui`

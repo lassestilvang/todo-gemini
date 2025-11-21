@@ -1,26 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getDb, createTaskHistoryEntry } from "@/lib/db"; // Import createTaskHistoryEntry
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: any }
 ) {
-  const awaitedParams = await params;
   const db = await getDb();
-  const task = await db.get("SELECT * FROM tasks WHERE id = ?", awaitedParams.id);
+  const task = await db.get("SELECT * FROM tasks WHERE id = ?", params.id);
   if (!task) {
     return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
-  const history = await db.all("SELECT * FROM task_history WHERE taskId = ? ORDER BY createdAt DESC", awaitedParams.id);
+  const history = await db.all("SELECT * FROM task_history WHERE taskId = ? ORDER BY createdAt DESC", params.id);
   return NextResponse.json({ ...task, history });
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: any }
 ) {
-  const awaitedParams = await params;
-  const id = awaitedParams.id;
+  const { id } = params;
   const data = await request.json();
   const {
     name,
@@ -107,11 +105,10 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: any }
 ) {
-  const awaitedParams = await params;
   const db = await getDb();
-  await db.run("DELETE FROM tasks WHERE id = ?", awaitedParams.id);
+  await db.run("DELETE FROM tasks WHERE id = ?", params.id);
   return new NextResponse(null, { status: 204 });
 }

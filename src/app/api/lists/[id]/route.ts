@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: any }
 ) {
   const db = await getDb();
   const list = await db.get("SELECT * FROM lists WHERE id = ?", params.id);
@@ -14,8 +14,8 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: any }
 ) {
   const data = await request.json();
   const { name, color, icon } = data;
@@ -32,8 +32,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: any }
 ) {
   const db = await getDb();
   await db.run("DELETE FROM lists WHERE id = ?", params.id);
