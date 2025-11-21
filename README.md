@@ -56,7 +56,7 @@ Ensure you have [Bun](https://bun.sh/docs/installation) installed on your machin
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/lassestilvang/todo-gemini
     cd todo-gemini
     ```
 2.  **Install dependencies:**
