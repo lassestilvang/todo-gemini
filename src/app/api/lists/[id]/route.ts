@@ -3,10 +3,11 @@ import { getDb } from "@/lib/db";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const db = await getDb();
-  const list = await db.get("SELECT * FROM lists WHERE id = ?", params.id);
+  const list = await db.get("SELECT * FROM lists WHERE id = ?", id);
   if (!list) {
     return NextResponse.json({ error: "List not found" }, { status: 404 });
   }
@@ -15,8 +16,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const data = await request.json();
   const { name, color, icon } = data;
   const db = await getDb();
@@ -25,17 +27,18 @@ export async function PUT(
     name,
     color,
     icon,
-    params.id
+    id,
   );
-  const updatedList = await db.get("SELECT * FROM lists WHERE id = ?", params.id);
+  const updatedList = await db.get("SELECT * FROM lists WHERE id = ?", id);
   return NextResponse.json(updatedList);
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const db = await getDb();
-  await db.run("DELETE FROM lists WHERE id = ?", params.id);
+  await db.run("DELETE FROM lists WHERE id = ?", id);
   return new NextResponse(null, { status: 204 });
 }
