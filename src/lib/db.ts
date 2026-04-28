@@ -71,25 +71,41 @@ export async function fetchTasksWithSubtasks(
   showCompleted: boolean,
 ): Promise<Task[]> {
   const db = await getDb();
-  let tasks: Task[] = await db.all(query, ...params);
 
-  // Filter out completed tasks if showCompleted is false
+  // Fetch the initial set of tasks based on the query
+  const initialTasks: Task[] = await db.all(query, ...params);
+  if (initialTasks.length === 0) return [];
+
+  // Fetch all tasks to build the full tree in memory
+  // This avoids N+1 problems. For a local todo app, this is efficient enough.
+  const allTasks: Task[] = await db.all("SELECT * FROM tasks");
+
+  // Create a map for quick lookup of subtasks
+  const taskMap = new Map<string, Task[]>();
+  allTasks.forEach((task) => {
+    if (task.parentId) {
+      const children = taskMap.get(task.parentId) || [];
+      children.push(task);
+      taskMap.set(task.parentId, children);
+    }
+  });
+
+  // Recursive function to attach subtasks
+  const attachSubtasks = (task: Task) => {
+    let subTasks = taskMap.get(task.id) || [];
+    if (!showCompleted) {
+      subTasks = subTasks.filter((st) => !st.completed);
+    }
+    task.subTasks = subTasks.map((st) => attachSubtasks(st));
+    return task;
+  };
+
+  let results = initialTasks;
   if (!showCompleted) {
-    tasks = tasks.filter((task) => !task.completed);
+    results = results.filter((t) => !t.completed);
   }
 
-  // Fetch subtasks for each task
-  for (const task of tasks) {
-    const subTasksQuery = "SELECT * FROM tasks WHERE parentId = ?";
-    const subTasks = await fetchTasksWithSubtasks(
-      subTasksQuery,
-      [task.id],
-      showCompleted,
-    );
-    task.subTasks = subTasks;
-  }
-
-  return tasks;
+  return results.map((t) => attachSubtasks(t));
 }
 
 export async function createTaskHistoryEntry(taskId: string, change: string) {
