@@ -154,24 +154,24 @@ export function AddTaskDialog({
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "col-span-3 justify-start text-left font-normal",
-                        !dateValue && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateValue || undefined}
-                      onSelect={(date) => form.setValue("date", date || null)}
-                      initialFocus
-                    />
+                    className={cn(
+                      "col-span-3 justify-start text-left font-normal",
+                      !dateValue && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateValue ? (
+                      format(dateValue, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateValue || undefined}
+                    onSelect={(date) => form.setValue("date", date || null)}
                     initialFocus
                   />
                 </PopoverContent>
@@ -193,12 +193,12 @@ export function AddTaskDialog({
                     variant={"outline"}
                     className={cn(
                       "col-span-3 justify-start text-left font-normal",
-                      !form.watch("deadline") && "text-muted-foreground",
+                      !deadlineValue && "text-muted-foreground",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.watch("deadline") ? (
-                      format(form.watch("deadline")!, "PPP")
+                    {deadlineValue ? (
+                      format(deadlineValue, "PPP")
                     ) : (
                       <span>Pick a deadline</span>
                     )}
@@ -207,7 +207,7 @@ export function AddTaskDialog({
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={form.watch("deadline") || undefined}
+                    selected={deadlineValue || undefined}
                     onSelect={(date) => form.setValue("deadline", date || null)}
                     initialFocus
                   />
@@ -242,7 +242,7 @@ export function AddTaskDialog({
                 Priority
               </Label>
               <Select
-                value={form.watch("priority")}
+                value={priorityValue}
                 onValueChange={(value: Task["priority"]) =>
                   form.setValue("priority", value)
                 }
