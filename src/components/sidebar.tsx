@@ -30,7 +30,7 @@ import {
 
 const Sidebar = () => {
   const { lists, fetchLists } = useListStore();
-  const { tasks: searchResults, searchTasks } = useTaskStore();
+  const { searchResults, searchTasks, clearSearchResults } = useTaskStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -41,9 +41,9 @@ const Sidebar = () => {
     if (searchQuery.length > 2) {
       searchTasks(searchQuery);
     } else {
-      // Clear search results if query is too short
+      clearSearchResults();
     }
-  }, [searchQuery, searchTasks]);
+  }, [searchQuery, searchTasks, clearSearchResults]);
 
   return (
     <aside className="w-80 h-screen bg-sidebar text-sidebar-foreground p-4 flex flex-col border-r border-sidebar-border">

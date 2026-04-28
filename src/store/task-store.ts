@@ -1,34 +1,47 @@
-import { create } from 'zustand';
-import type { Task } from '@/types';
+import { create } from "zustand";
+import type { Task } from "@/types";
 
 // This will be a more complex type once relations are included
-type TaskWithRelations = Task; 
+type TaskWithRelations = Task;
 
 interface TaskState {
   tasks: TaskWithRelations[];
+  searchResults: TaskWithRelations[];
   fetchTasks: (listId?: string, showCompleted?: boolean) => Promise<void>;
   fetchTodayTasks: (showCompleted?: boolean) => Promise<void>;
   fetchNext7DaysTasks: (showCompleted?: boolean) => Promise<void>;
   fetchUpcomingTasks: (showCompleted?: boolean) => Promise<void>;
-  searchTasks: (query: string) => Promise<void>; // New function
-  addTask: (newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'completed' | 'recurring' | 'actualTime'>) => Promise<void>;
+  searchTasks: (query: string) => Promise<void>;
+  clearSearchResults: () => void;
+  addTask: (
+    newTask: Omit<
+      Task,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "completed"
+      | "recurring"
+      | "actualTime"
+    >,
+  ) => Promise<void>;
   updateTask: (taskId: string, updatedTask: Partial<Task>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set) => ({
   tasks: [],
+  searchResults: [],
   fetchTasks: async (listId, showCompleted) => {
-    let url = listId ? `/api/tasks?listId=${listId}` : '/api/tasks';
+    let url = listId ? `/api/tasks?listId=${listId}` : "/api/tasks";
     if (showCompleted !== undefined) {
-      url += `${listId ? '&' : '?'}showCompleted=${showCompleted}`;
+      url += `${listId ? "&" : "?"}showCompleted=${showCompleted}`;
     }
     const response = await fetch(url);
     const tasks = await response.json();
     set({ tasks });
   },
   fetchTodayTasks: async (showCompleted) => {
-    let url = '/api/tasks/today';
+    let url = "/api/tasks/today";
     if (showCompleted !== undefined) {
       url += `?showCompleted=${showCompleted}`;
     }
@@ -37,7 +50,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     set({ tasks });
   },
   fetchNext7DaysTasks: async (showCompleted) => {
-    let url = '/api/tasks/next-7-days';
+    let url = "/api/tasks/next-7-days";
     if (showCompleted !== undefined) {
       url += `?showCompleted=${showCompleted}`;
     }
@@ -46,7 +59,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     set({ tasks });
   },
   fetchUpcomingTasks: async (showCompleted) => {
-    let url = '/api/tasks/upcoming';
+    let url = "/api/tasks/upcoming";
     if (showCompleted !== undefined) {
       url += `?showCompleted=${showCompleted}`;
     }
@@ -54,16 +67,17 @@ export const useTaskStore = create<TaskState>((set) => ({
     const tasks = await response.json();
     set({ tasks });
   },
-  searchTasks: async (query) => { // New function implementation
+  searchTasks: async (query) => {
     const response = await fetch(`/api/tasks/search?query=${query}`);
-    const tasks = await response.json();
-    set({ tasks });
+    const searchResults = await response.json();
+    set({ searchResults });
   },
+  clearSearchResults: () => set({ searchResults: [] }),
   addTask: async (newTask) => {
-    const response = await fetch('/api/tasks', {
-      method: 'POST',
+    const response = await fetch("/api/tasks", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(newTask),
     });
@@ -72,25 +86,29 @@ export const useTaskStore = create<TaskState>((set) => ({
   },
   updateTask: async (taskId, updatedTask) => {
     const response = await fetch(`/api/tasks/${taskId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedTask),
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedTask),
     });
     const returnedTask = await response.json();
     set((state) => ({
-        tasks: state.tasks.map((task) =>
-            task.id === taskId ? returnedTask : task
-        ),
+      tasks: state.tasks.map((task) =>
+        task.id === taskId ? returnedTask : task,
+      ),
+      searchResults: state.searchResults.map((task) =>
+        task.id === taskId ? returnedTask : task,
+      ),
     }));
   },
   deleteTask: async (taskId) => {
     await fetch(`/api/tasks/${taskId}`, {
-        method: 'DELETE',
+      method: "DELETE",
     });
     set((state) => ({
-        tasks: state.tasks.filter((task) => task.id !== taskId),
+      tasks: state.tasks.filter((task) => task.id !== taskId),
+      searchResults: state.searchResults.filter((task) => task.id !== taskId),
     }));
   },
 }));
