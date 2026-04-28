@@ -1,12 +1,15 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getDb, fetchTasksWithSubtasks, createTaskHistoryEntry } from "@/lib/db"; // Import createTaskHistoryEntry
+import {
+  getDb,
+  fetchTasksWithSubtasks,
+  createTaskHistoryEntry,
+} from "@/lib/db"; // Import createTaskHistoryEntry
 import cuid from "cuid";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const listId = searchParams.get("listId");
   const showCompleted = searchParams.get("showCompleted") === "true"; // Convert to boolean
-  const db = await getDb();
 
   let query = "SELECT * FROM tasks WHERE parentId IS NULL"; // Only fetch top-level tasks
   const params = [];
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
     estimate || 0,
     priority || "NONE",
     listId,
-    parentId || null // Added parentId
+    parentId || null, // Added parentId
   );
   const newTask = await db.get("SELECT * FROM tasks WHERE id = ?", id);
   await createTaskHistoryEntry(id, `Task created: ${name}`); // Create history entry
