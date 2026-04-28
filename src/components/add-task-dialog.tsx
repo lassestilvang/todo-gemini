@@ -15,7 +15,11 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useTaskStore } from "@/store/task-store";
 import { Textarea } from "./ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -28,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Task } from "@/types";
-import { useForm } from "react-hook-form"; // Import useForm
+import { useForm, useWatch } from "react-hook-form"; // Import useForm and useWatch
 import { zodResolver } from "@hookform/resolvers/zod"; // Import zodResolver
 import * as z from "zod"; // Import zod
 
@@ -39,7 +43,9 @@ const formSchema = z.object({
   date: z.date().nullable(),
   deadline: z.date().nullable(),
   reminder: z.string().nullable(), // Added reminder to formSchema
-  estimate: z.string().regex(/^\d{2}:\d{2}$/, { message: "Estimate must be in HH:mm format." }),
+  estimate: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, { message: "Estimate must be in HH:mm format." }),
   priority: z.enum(["NONE", "LOW", "MEDIUM", "HIGH"]),
 });
 
@@ -49,7 +55,11 @@ interface AddTaskDialogProps {
   parentId?: string;
 }
 
-export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps) {
+export function AddTaskDialog({
+  children,
+  listId,
+  parentId,
+}: AddTaskDialogProps) {
   const [open, setOpen] = useState(false);
   const { addTask } = useTaskStore();
 
@@ -66,8 +76,12 @@ export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps
     },
   });
 
+  const dateValue = useWatch({ control: form.control, name: "date" });
+  const deadlineValue = useWatch({ control: form.control, name: "deadline" });
+  const priorityValue = useWatch({ control: form.control, name: "priority" });
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const [hours, minutes] = values.estimate.split(':').map(Number);
+    const [hours, minutes] = values.estimate.split(":").map(Number);
     const estimateInMinutes = hours * 60 + minutes;
 
     await addTask({
@@ -90,9 +104,13 @@ export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{parentId ? "Add Sub-Task" : "Add New Task"}</DialogTitle>
+          <DialogTitle>
+            {parentId ? "Add Sub-Task" : "Add New Task"}
+          </DialogTitle>
           <DialogDescription>
-            {parentId ? "Create a new sub-task for this task." : "Create a new task for your list."}
+            {parentId
+              ? "Create a new sub-task for this task."
+              : "Create a new task for your list."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -136,20 +154,24 @@ export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps
                 <PopoverTrigger asChild>
                   <Button
                     variant={"outline"}
-                    className={cn(
-                      "col-span-3 justify-start text-left font-normal",
-                      !form.watch("date") && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.watch("date") ? format(form.watch("date")!, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={form.watch("date") || undefined}
-                    onSelect={(date) => form.setValue("date", date || null)}
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "col-span-3 justify-start text-left font-normal",
+                        !dateValue && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={dateValue || undefined}
+                      onSelect={(date) => form.setValue("date", date || null)}
+                      initialFocus
+                    />
                     initialFocus
                   />
                 </PopoverContent>
@@ -171,11 +193,15 @@ export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps
                     variant={"outline"}
                     className={cn(
                       "col-span-3 justify-start text-left font-normal",
-                      !form.watch("deadline") && "text-muted-foreground"
+                      !form.watch("deadline") && "text-muted-foreground",
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.watch("deadline") ? format(form.watch("deadline")!, "PPP") : <span>Pick a deadline</span>}
+                    {form.watch("deadline") ? (
+                      format(form.watch("deadline")!, "PPP")
+                    ) : (
+                      <span>Pick a deadline</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -215,7 +241,12 @@ export function AddTaskDialog({ children, listId, parentId }: AddTaskDialogProps
               <Label htmlFor="priority" className="text-right">
                 Priority
               </Label>
-              <Select value={form.watch("priority")} onValueChange={(value: Task['priority']) => form.setValue("priority", value)}>
+              <Select
+                value={form.watch("priority")}
+                onValueChange={(value: Task["priority"]) =>
+                  form.setValue("priority", value)
+                }
+              >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
