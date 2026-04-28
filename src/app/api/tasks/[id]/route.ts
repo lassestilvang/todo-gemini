@@ -3,22 +3,26 @@ import { getDb, createTaskHistoryEntry } from "@/lib/db"; // Import createTaskHi
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const db = await getDb();
-  const task = await db.get("SELECT * FROM tasks WHERE id = ?", params.id);
+  const task = await db.get("SELECT * FROM tasks WHERE id = ?", id);
   if (!task) {
     return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
-  const history = await db.all("SELECT * FROM task_history WHERE taskId = ? ORDER BY createdAt DESC", params.id);
+  const history = await db.all(
+    "SELECT * FROM task_history WHERE taskId = ? ORDER BY createdAt DESC",
+    id,
+  );
   return NextResponse.json({ ...task, history });
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params;
+  const { id } = await params;
   const data = await request.json();
   const {
     name,
@@ -32,7 +36,7 @@ export async function PUT(
     parentId, // Added parentId
   } = data;
   const db = await getDb();
-  
+
   const fields = [];
   const values = [];
   const changes = []; // To track changes for history
@@ -77,7 +81,8 @@ export async function PUT(
     values.push(completed ? 1 : 0);
     changes.push(`Completed status changed to: ${completed}`);
   }
-  if (parentId !== undefined) { // Added parentId update
+  if (parentId !== undefined) {
+    // Added parentId update
     fields.push("parentId = ?");
     values.push(parentId);
     changes.push(`Parent task changed to: ${parentId}`);
@@ -90,10 +95,7 @@ export async function PUT(
   fields.push("updatedAt = CURRENT_TIMESTAMP");
   values.push(id);
 
-  await db.run(
-    `UPDATE tasks SET ${fields.join(", ")} WHERE id = ?`,
-    ...values
-  );
+  await db.run(`UPDATE tasks SET ${fields.join(", ")} WHERE id = ?`, ...values);
 
   // Create history entries for all changes
   for (const change of changes) {
@@ -106,9 +108,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const db = await getDb();
-  await db.run("DELETE FROM tasks WHERE id = ?", params.id);
+  await db.run("DELETE FROM tasks WHERE id = ?", id);
   return new NextResponse(null, { status: 204 });
 }
