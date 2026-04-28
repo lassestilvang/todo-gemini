@@ -11,9 +11,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
-// import { ThemeToggle } from "./theme-toggle"; // Removed ThemeToggle
 import { AddListDialog } from "./add-list-dialog";
-import { AddTaskDialog } from "./add-task-dialog"; // Import AddTaskDialog
+import { AddTaskDialog } from "./add-task-dialog";
 import Link from "next/link";
 import {
   Inbox,
@@ -26,10 +25,18 @@ import {
   PlusCircle,
   Search,
   Plus,
+  MoreVertical,
+  Trash2,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 const Sidebar = () => {
-  const { lists, fetchLists } = useListStore();
+  const { lists, fetchLists, deleteList } = useListStore();
   const { searchResults, searchTasks, clearSearchResults } = useTaskStore();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -45,6 +52,16 @@ const Sidebar = () => {
     }
   }, [searchQuery, searchTasks, clearSearchResults]);
 
+  const handleDeleteList = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      confirm("Are you sure you want to delete this list and all its tasks?")
+    ) {
+      await deleteList(id);
+    }
+  };
+
   return (
     <aside className="w-80 h-screen bg-sidebar text-sidebar-foreground p-4 flex flex-col border-r border-sidebar-border">
       <div className="flex items-center justify-between mb-6">
@@ -54,7 +71,6 @@ const Sidebar = () => {
           </Avatar>
           <h1 className="text-lg font-semibold">n0rd</h1>
         </div>
-        {/* <ThemeToggle /> */} {/* Removed ThemeToggle */}
       </div>
 
       <div className="mb-6">
@@ -96,12 +112,12 @@ const Sidebar = () => {
         >
           <Inbox className="mr-3 h-5 w-5" />
           <span className="flex-1">Inbox</span>
-          <span className="text-xs text-muted-foreground">5</span>
+          {/* <span className="text-xs text-muted-foreground">5</span> */}
         </Link>
         <Link href="/today" className="flex items-center p-2 rounded-md">
           <Calendar className="mr-3 h-5 w-5" />
           <span className="flex-1">Today</span>
-          <span className="text-xs text-muted-foreground">2</span>
+          {/* <span className="text-xs text-muted-foreground">2</span> */}
         </Link>
         <Link href="/next-7-days" className="flex items-center p-2 rounded-md">
           <CalendarDays className="mr-3 h-5 w-5" />
@@ -131,7 +147,7 @@ const Sidebar = () => {
             <Link href="/all" className="flex items-center text-sm">
               <Star className="mr-3 h-4 w-4 text-yellow-500" />
               <span className="flex-1">All Tasks</span>
-              <span className="text-xs text-muted-foreground">12</span>
+              {/* <span className="text-xs text-muted-foreground">12</span> */}
             </Link>
           </CollapsibleContent>
         </Collapsible>
@@ -150,20 +166,37 @@ const Sidebar = () => {
           </div>
           <CollapsibleContent className="pl-6 space-y-2 mt-2">
             {lists.map((list) => (
-              <Link
-                href="#"
-                key={list.id}
-                className="flex items-center text-sm"
-              >
-                <span
-                  className="mr-3 h-4 w-4 text-center"
-                  style={{ color: list.color }}
-                >
-                  {list.icon}
-                </span>
-                <span className="flex-1">{list.name}</span>
-                {/* <span className="text-xs text-muted-foreground">0</span> */}
-              </Link>
+              <div key={list.id} className="flex items-center text-sm group">
+                <Link href="#" className="flex-1 flex items-center">
+                  <span
+                    className="mr-3 h-4 w-4 text-center"
+                    style={{ color: list.color }}
+                  >
+                    {list.icon}
+                  </span>
+                  <span className="flex-1">{list.name}</span>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={(e) => handleDeleteList(e, list.id)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete List
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ))}
           </CollapsibleContent>
         </Collapsible>
