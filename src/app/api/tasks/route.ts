@@ -5,6 +5,8 @@ import {
   createTaskHistoryEntry,
 } from "@/lib/db"; // Import createTaskHistoryEntry
 import cuid from "cuid";
+import { taskApiSchema } from "@/lib/schemas";
+import { z } from "zod";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -29,36 +31,47 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
-  const {
-    name,
-    description,
-    date,
-    deadline,
-    reminder,
-    estimate,
-    priority,
-    listId,
-    parentId, // Added parentId
-  } = data;
-  const id = cuid();
-  const db = await getDb();
-  await db.run(
-    `INSERT INTO tasks (
-      id, name, description, date, deadline, reminder, estimate, priority, listId, parentId
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    id,
-    name,
-    description || null,
-    date || null,
-    deadline || null,
-    reminder || null,
-    estimate || 0,
-    priority || "NONE",
-    listId,
-    parentId || null, // Added parentId
-  );
-  const newTask = await db.get("SELECT * FROM tasks WHERE id = ?", id);
-  await createTaskHistoryEntry(id, `Task created: ${name}`); // Create history entry
-  return NextResponse.json(newTask, { status: 201 });
+  try {
+    const json = await request.json();
+    const body = taskApiSchema.parse(json);
+    const {
+      name,
+      description,
+      date,
+      deadline,
+      reminder,
+      estimate,
+      priority,
+      listId,
+      parentId,
+    } = body;
+    const id = cuid();
+    const db = await getDb();
+    await db.run(
+      `INSERT INTO tasks (
+        id, name, description, date, deadline, reminder, estimate, priority, listId, parentId
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      id,
+      name,
+      description ?? null,
+      date ?? null,
+      deadline ?? null,
+      reminder ?? null,
+      estimate ?? 0,
+      priority ?? "NONE",
+      listId,
+      parentId ?? null,
+    );
+    const newTask = await db.get("SELECT * FROM tasks WHERE id = ?", id);
+    await createTaskHistoryEntry(id, `Task created: ${name}`); // Create history entry
+    return NextResponse.json(newTask, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }
