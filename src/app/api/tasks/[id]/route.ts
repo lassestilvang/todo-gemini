@@ -32,7 +32,7 @@ export async function PUT(
     const db = await getDb();
 
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     const changes: string[] = []; // To track changes for history
 
     const fieldMap: Record<string, string> = {
