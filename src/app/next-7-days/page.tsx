@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useTaskStore } from "@/store/task-store";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AddTaskDialog } from "@/components/add-task-dialog";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { TaskItem } from "@/components/task-item"; // Import TaskItem
