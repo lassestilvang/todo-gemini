@@ -3,11 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useListStore } from "@/store/list-store";
 import { useTaskStore } from "@/store/task-store";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -26,7 +22,6 @@ import {
   Filter,
   CheckCircle,
   Star,
-  Home,
   ChevronDown,
   PlusCircle,
   Search,
@@ -155,8 +150,17 @@ const Sidebar = () => {
           </div>
           <CollapsibleContent className="pl-6 space-y-2 mt-2">
             {lists.map((list) => (
-              <Link href="#" key={list.id} className="flex items-center text-sm">
-                <span className="mr-3 h-4 w-4 text-center" style={{ color: list.color }}>{list.icon}</span>
+              <Link
+                href="#"
+                key={list.id}
+                className="flex items-center text-sm"
+              >
+                <span
+                  className="mr-3 h-4 w-4 text-center"
+                  style={{ color: list.color }}
+                >
+                  {list.icon}
+                </span>
                 <span className="flex-1">{list.name}</span>
                 {/* <span className="text-xs text-muted-foreground">0</span> */}
               </Link>

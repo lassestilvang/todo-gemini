@@ -1,15 +1,15 @@
-import { open } from 'sqlite';
-import sqlite3 from 'sqlite3';
-import { Database } from 'sqlite';
-import { Task } from '@/types';
-import cuid from 'cuid'; // Import cuid
+import { open } from "sqlite";
+import sqlite3 from "sqlite3";
+import { Database } from "sqlite";
+import { Task } from "@/types";
+import cuid from "cuid"; // Import cuid
 
 let db: Database | null = null;
 
 export async function getDb() {
   if (!db) {
     db = await open({
-      filename: './todo.db',
+      filename: "./todo.db",
       driver: sqlite3.Database,
     });
   }
@@ -17,9 +17,9 @@ export async function getDb() {
 }
 
 export async function initializeDb() {
-    const db = await getDb();
+  const db = await getDb();
 
-    await db.exec(`
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS lists (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
@@ -30,7 +30,7 @@ export async function initializeDb() {
         );
     `);
 
-    await db.exec(`
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS tasks (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -52,7 +52,7 @@ export async function initializeDb() {
         );
     `);
 
-    await db.exec(`
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS task_history (
             id TEXT PRIMARY KEY,
             change TEXT NOT NULL,
@@ -61,27 +61,31 @@ export async function initializeDb() {
             FOREIGN KEY (taskId) REFERENCES tasks (id) ON DELETE CASCADE
         );
     `);
-    
-    console.log('Database initialized');
+
+  console.log("Database initialized");
 }
 
 export async function fetchTasksWithSubtasks(
   query: string,
-  params: any[],
-  showCompleted: boolean
+  params: unknown[],
+  showCompleted: boolean,
 ): Promise<Task[]> {
   const db = await getDb();
   let tasks: Task[] = await db.all(query, ...params);
 
   // Filter out completed tasks if showCompleted is false
   if (!showCompleted) {
-    tasks = tasks.filter(task => !task.completed);
+    tasks = tasks.filter((task) => !task.completed);
   }
 
   // Fetch subtasks for each task
   for (const task of tasks) {
     const subTasksQuery = "SELECT * FROM tasks WHERE parentId = ?";
-    const subTasks = await fetchTasksWithSubtasks(subTasksQuery, [task.id], showCompleted);
+    const subTasks = await fetchTasksWithSubtasks(
+      subTasksQuery,
+      [task.id],
+      showCompleted,
+    );
     task.subTasks = subTasks;
   }
 
@@ -95,6 +99,6 @@ export async function createTaskHistoryEntry(taskId: string, change: string) {
     "INSERT INTO task_history (id, taskId, change) VALUES (?, ?, ?)",
     id,
     taskId,
-    change
+    change,
   );
 }
