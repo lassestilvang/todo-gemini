@@ -93,22 +93,47 @@ export const useTaskStore = create<TaskState>((set) => ({
       body: JSON.stringify(updatedTask),
     });
     const returnedTask = await response.json();
+
+    const updateRecursive = (
+      tasks: TaskWithRelations[],
+    ): TaskWithRelations[] => {
+      return tasks.map((task) => {
+        if (task.id === taskId) {
+          return { ...returnedTask, subTasks: task.subTasks };
+        }
+        if (task.subTasks && task.subTasks.length > 0) {
+          return { ...task, subTasks: updateRecursive(task.subTasks) };
+        }
+        return task;
+      });
+    };
+
     set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === taskId ? returnedTask : task,
-      ),
-      searchResults: state.searchResults.map((task) =>
-        task.id === taskId ? returnedTask : task,
-      ),
+      tasks: updateRecursive(state.tasks),
+      searchResults: updateRecursive(state.searchResults),
     }));
   },
   deleteTask: async (taskId) => {
     await fetch(`/api/tasks/${taskId}`, {
       method: "DELETE",
     });
+
+    const deleteRecursive = (
+      tasks: TaskWithRelations[],
+    ): TaskWithRelations[] => {
+      return tasks
+        .filter((task) => task.id !== taskId)
+        .map((task) => {
+          if (task.subTasks && task.subTasks.length > 0) {
+            return { ...task, subTasks: deleteRecursive(task.subTasks) };
+          }
+          return task;
+        });
+    };
+
     set((state) => ({
-      tasks: state.tasks.filter((task) => task.id !== taskId),
-      searchResults: state.searchResults.filter((task) => task.id !== taskId),
+      tasks: deleteRecursive(state.tasks),
+      searchResults: deleteRecursive(state.searchResults),
     }));
   },
 }));
