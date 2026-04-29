@@ -7,10 +7,11 @@ import { isOverdue, cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/task-store";
 import { TaskDialog } from "./task-dialog";
 import { Button } from "./ui/button";
-import { Plus, History, Trash2, Pencil } from "lucide-react";
+import { Plus, History, Trash2, Pencil, Calendar, Clock } from "lucide-react";
 import { TaskHistoryDialog } from "./task-history-dialog";
 import { motion } from "framer-motion"; // Import motion
 import confetti from "canvas-confetti";
+import { format } from "date-fns";
 
 interface TaskItemProps {
   task: Task;
@@ -58,11 +59,45 @@ export function TaskItem({ task }: TaskItemProps) {
           onCheckedChange={() => handleToggleTask(task.id, task.completed)}
           className="mr-2"
         />
-        <span
-          className={task.completed ? "line-through text-muted-foreground" : ""}
-        >
-          {task.name}
-        </span>
+        <div className="flex items-center flex-1">
+          {task.priority !== "NONE" && (
+            <div
+              className={cn(
+                "w-2 h-2 rounded-full mr-2",
+                task.priority === "HIGH" && "bg-red-500",
+                task.priority === "MEDIUM" && "bg-yellow-500",
+                task.priority === "LOW" && "bg-blue-500",
+              )}
+            />
+          )}
+          <span
+            className={
+              task.completed ? "line-through text-muted-foreground" : ""
+            }
+          >
+            {task.name}
+          </span>
+          {task.subTasks && task.subTasks.length > 0 && (
+            <span className="ml-2 text-xs text-muted-foreground">
+              ({task.subTasks.filter((st) => st.completed).length}/
+              {task.subTasks.length})
+            </span>
+          )}
+          <div className="ml-4 flex items-center space-x-2">
+            {task.deadline && (
+              <div className="flex items-center text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">
+                <Calendar className="w-3 h-3 mr-1" />
+                {format(new Date(task.deadline), "MMM d")}
+              </div>
+            )}
+            {task.estimate > 0 && (
+              <div className="flex items-center text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">
+                <Clock className="w-3 h-3 mr-1" />
+                {Math.floor(task.estimate / 60)}h {task.estimate % 60}m
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="ml-auto flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {task.history && task.history.length > 0 && (
