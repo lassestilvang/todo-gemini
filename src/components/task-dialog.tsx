@@ -49,32 +49,55 @@ const formSchema = z.object({
   priority: z.enum(["NONE", "LOW", "MEDIUM", "HIGH"]),
 });
 
-interface AddTaskDialogProps {
+interface TaskDialogProps {
   children: React.ReactNode;
   listId: string;
   parentId?: string;
+  task?: Task; // Added task for editing
 }
 
-export function AddTaskDialog({
+export function TaskDialog({
   children,
   listId,
   parentId,
-}: AddTaskDialogProps) {
+  task,
+}: TaskDialogProps) {
   const [open, setOpen] = useState(false);
-  const { addTask } = useTaskStore();
+  const { addTask, updateTask } = useTaskStore();
+
+  const formatEstimate = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      description: null,
-      date: null,
-      deadline: null,
-      reminder: null, // Added reminder to defaultValues
-      estimate: "00:00",
-      priority: "NONE",
+      name: task?.name || "",
+      description: task?.description || null,
+      date: task?.date ? new Date(task.date) : null,
+      deadline: task?.deadline ? new Date(task.deadline) : null,
+      reminder: task?.reminder || null,
+      estimate: task ? formatEstimate(task.estimate) : "00:00",
+      priority: task?.priority || "NONE",
     },
   });
+
+  // Update form values when task changes (important for edit mode)
+  React.useEffect(() => {
+    if (task && open) {
+      form.reset({
+        name: task.name,
+        description: task.description,
+        date: task.date ? new Date(task.date) : null,
+        deadline: task.deadline ? new Date(task.deadline) : null,
+        reminder: task.reminder,
+        estimate: formatEstimate(task.estimate),
+        priority: task.priority,
+      });
+    }
+  }, [task, open, form]);
 
   const dateValue = useWatch({ control: form.control, name: "date" });
   const deadlineValue = useWatch({ control: form.control, name: "deadline" });
@@ -84,18 +107,27 @@ export function AddTaskDialog({
     const [hours, minutes] = values.estimate.split(":").map(Number);
     const estimateInMinutes = hours * 60 + minutes;
 
-    await addTask({
+    const taskData = {
       name: values.name,
       description: values.description,
       listId,
       date: values.date?.toISOString() || null,
       deadline: values.deadline?.toISOString() || null,
-      reminder: values.reminder, // Added reminder
+      reminder: values.reminder,
       estimate: estimateInMinutes,
       priority: values.priority,
-      parentId: parentId || null,
-    });
-    form.reset();
+      parentId: parentId || task?.parentId || null,
+    };
+
+    if (task) {
+      await updateTask(task.id, taskData);
+    } else {
+      await addTask(taskData);
+    }
+
+    if (!task) {
+      form.reset();
+    }
     setOpen(false);
   };
 
@@ -105,12 +137,14 @@ export function AddTaskDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {parentId ? "Add Sub-Task" : "Add New Task"}
+            {task ? "Edit Task" : parentId ? "Add Sub-Task" : "Add New Task"}
           </DialogTitle>
           <DialogDescription>
-            {parentId
-              ? "Create a new sub-task for this task."
-              : "Create a new task for your list."}
+            {task
+              ? "Update the details of your task."
+              : parentId
+                ? "Create a new sub-task for this task."
+                : "Create a new task for your list."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>

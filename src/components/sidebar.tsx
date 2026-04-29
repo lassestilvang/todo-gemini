@@ -12,7 +12,7 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { AddListDialog } from "./add-list-dialog";
-import { AddTaskDialog } from "./add-task-dialog";
+import { TaskDialog } from "./task-dialog";
 import Link from "next/link";
 import {
   Inbox,
@@ -74,12 +74,12 @@ const Sidebar = () => {
       </div>
 
       <div className="mb-6">
-        <AddTaskDialog listId={lists[0]?.id}>
+        <TaskDialog listId={lists[0]?.id}>
           <Button className="w-full justify-start mb-2">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add task
           </Button>
-        </AddTaskDialog>
+        </TaskDialog>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

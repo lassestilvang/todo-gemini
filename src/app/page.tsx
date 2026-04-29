@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTaskStore } from "@/store/task-store";
 import { useListStore } from "@/store/list-store";
 import { Button } from "@/components/ui/button";
-import { AddTaskDialog } from "@/components/add-task-dialog";
+import { TaskDialog } from "@/components/task-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { TaskItem } from "@/components/task-item"; // Import TaskItem
@@ -33,9 +33,9 @@ export default function Home() {
             onCheckedChange={setShowCompleted}
           />
           {inbox && (
-            <AddTaskDialog listId={inbox.id}>
+            <TaskDialog listId={inbox.id}>
               <Button>Add Task</Button>
-            </AddTaskDialog>
+            </TaskDialog>
           )}
         </div>
       </div>

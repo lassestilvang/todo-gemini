@@ -5,9 +5,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Task } from "@/types";
 import { isOverdue, cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/task-store";
-import { AddTaskDialog } from "./add-task-dialog";
+import { TaskDialog } from "./task-dialog";
 import { Button } from "./ui/button";
-import { Plus, History, Trash2 } from "lucide-react";
+import { Plus, History, Trash2, Pencil } from "lucide-react";
 import { TaskHistoryDialog } from "./task-history-dialog";
 import { motion } from "framer-motion"; // Import motion
 
@@ -61,11 +61,16 @@ export function TaskItem({ task }: TaskItemProps) {
               </Button>
             </TaskHistoryDialog>
           )}
-          <AddTaskDialog listId={task.listId} parentId={task.id}>
+          <TaskDialog listId={task.listId} parentId={task.id}>
             <Button variant="ghost" size="icon" className="h-6 w-6">
               <Plus className="h-4 w-4" />
             </Button>
-          </AddTaskDialog>
+          </TaskDialog>
+          <TaskDialog listId={task.listId} task={task}>
+            <Button variant="ghost" size="icon" className="h-6 w-6">
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </TaskDialog>
           <Button
             variant="ghost"
             size="icon"
