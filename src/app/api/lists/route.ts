@@ -4,7 +4,12 @@ import { createId } from "@paralleldrive/cuid2";
 
 export async function GET() {
   const db = await getDb();
-  const lists = await db.all("SELECT * FROM lists");
+  const lists = await db.all(`
+    SELECT l.*, COUNT(t.id) as taskCount
+    FROM lists l
+    LEFT JOIN tasks t ON l.id = t.listId AND t.completed = 0 AND t.parentId IS NULL
+    GROUP BY l.id
+  `);
   return NextResponse.json(lists);
 }
 

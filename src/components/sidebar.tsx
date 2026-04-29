@@ -41,7 +41,13 @@ import { ThemeToggle } from "./theme-toggle";
 
 const Sidebar = () => {
   const { lists, fetchLists, deleteList } = useListStore();
-  const { searchResults, searchTasks, clearSearchResults } = useTaskStore();
+  const {
+    searchResults,
+    searchTasks,
+    clearSearchResults,
+    counts,
+    fetchCounts,
+  } = useTaskStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
@@ -51,7 +57,8 @@ const Sidebar = () => {
 
   useEffect(() => {
     fetchLists();
-  }, [fetchLists]);
+    fetchCounts();
+  }, [fetchLists, fetchCounts]);
 
   useEffect(() => {
     if (searchQuery.length > 2) {
@@ -150,10 +157,20 @@ const Sidebar = () => {
         >
           <Inbox className="mr-3 h-5 w-5" />
           <span className="flex-1">Inbox</span>
+          {counts.inbox > 0 && (
+            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+              {counts.inbox}
+            </span>
+          )}
         </Link>
         <Link href="/today" className="flex items-center p-2 rounded-md">
           <Calendar className="mr-3 h-5 w-5" />
           <span className="flex-1">Today</span>
+          {counts.today > 0 && (
+            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+              {counts.today}
+            </span>
+          )}
         </Link>
         <Link href="/next-7-days" className="flex items-center p-2 rounded-md">
           <CalendarDays className="mr-3 h-5 w-5" />
@@ -183,6 +200,11 @@ const Sidebar = () => {
             <Link href="/all" className="flex items-center text-sm">
               <Star className="mr-3 h-4 w-4 text-yellow-500" />
               <span className="flex-1">All Tasks</span>
+              {counts.all > 0 && (
+                <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+                  {counts.all}
+                </span>
+              )}
             </Link>
           </CollapsibleContent>
         </Collapsible>
@@ -210,6 +232,11 @@ const Sidebar = () => {
                     {list.icon}
                   </span>
                   <span className="flex-1">{list.name}</span>
+                  {list.taskCount !== undefined && list.taskCount > 0 && (
+                    <span className="text-[10px] text-muted-foreground bg-muted px-1 py-0.5 rounded-full min-w-[1.25rem] text-center mr-2">
+                      {list.taskCount}
+                    </span>
+                  )}
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

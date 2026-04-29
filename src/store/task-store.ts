@@ -7,12 +7,14 @@ type TaskWithRelations = Task;
 interface TaskState {
   tasks: TaskWithRelations[];
   searchResults: TaskWithRelations[];
+  counts: { today: number; inbox: number; all: number };
   fetchTasks: (listId?: string, showCompleted?: boolean) => Promise<void>;
   fetchTodayTasks: (showCompleted?: boolean) => Promise<void>;
   fetchNext7DaysTasks: (showCompleted?: boolean) => Promise<void>;
   fetchUpcomingTasks: (showCompleted?: boolean) => Promise<void>;
   searchTasks: (query: string) => Promise<void>;
   clearSearchResults: () => void;
+  fetchCounts: () => Promise<void>;
   addTask: (
     newTask: Omit<
       Task,
@@ -28,9 +30,10 @@ interface TaskState {
   deleteTask: (taskId: string) => Promise<void>;
 }
 
-export const useTaskStore = create<TaskState>((set) => ({
+export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   searchResults: [],
+  counts: { today: 0, inbox: 0, all: 0 },
   fetchTasks: async (listId, showCompleted) => {
     let url = listId ? `/api/tasks?listId=${listId}` : "/api/tasks";
     if (showCompleted !== undefined) {
@@ -73,6 +76,11 @@ export const useTaskStore = create<TaskState>((set) => ({
     set({ searchResults });
   },
   clearSearchResults: () => set({ searchResults: [] }),
+  fetchCounts: async () => {
+    const response = await fetch("/api/tasks/counts");
+    const counts = await response.json();
+    set({ counts });
+  },
   addTask: async (newTask) => {
     const response = await fetch("/api/tasks", {
       method: "POST",
@@ -83,6 +91,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     });
     const createdTask = await response.json();
     set((state) => ({ tasks: [...state.tasks, createdTask] }));
+    get().fetchCounts();
   },
   updateTask: async (taskId, updatedTask) => {
     const response = await fetch(`/api/tasks/${taskId}`, {
@@ -112,6 +121,7 @@ export const useTaskStore = create<TaskState>((set) => ({
       tasks: updateRecursive(state.tasks),
       searchResults: updateRecursive(state.searchResults),
     }));
+    get().fetchCounts();
   },
   deleteTask: async (taskId) => {
     await fetch(`/api/tasks/${taskId}`, {
@@ -135,5 +145,6 @@ export const useTaskStore = create<TaskState>((set) => ({
       tasks: deleteRecursive(state.tasks),
       searchResults: deleteRecursive(state.searchResults),
     }));
+    get().fetchCounts();
   },
 }));

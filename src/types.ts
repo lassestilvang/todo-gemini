@@ -5,6 +5,7 @@ export interface List {
   icon: string;
   createdAt: string;
   updatedAt: string;
+  taskCount?: number; // Added taskCount
 }
 
 export interface Task {
@@ -16,7 +17,7 @@ export interface Task {
   reminder: string | null;
   estimate: number;
   actualTime: number | null;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
+  priority: "HIGH" | "MEDIUM" | "LOW" | "NONE";
   completed: boolean;
   recurring: string | null; // JSON stored as string
   createdAt: string;
