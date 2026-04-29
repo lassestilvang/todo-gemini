@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "bun test src/lib",
+    "test:e2e": "playwright test",
     "db:init": "bun src/scripts/init-db.ts",
     "db:seed": "bun src/scripts/seed.ts"
   },
@@ -43,6 +45,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
