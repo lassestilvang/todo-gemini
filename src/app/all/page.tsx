@@ -25,14 +25,18 @@ export default function AllTasksPage() {
             checked={showCompleted}
             onCheckedChange={setShowCompleted}
           />
-          {/* AddTaskDialog for All tasks - needs a listId, which is not directly available here. */}
+          {/* TaskDialog for All tasks - needs a listId, which is not directly available here. */}
         </div>
       </div>
 
       <div className="space-y-2">
-        {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} />
-        ))}
+        {tasks.length > 0 ? (
+          tasks.map((task) => <TaskItem key={task.id} task={task} />)
+        ) : (
+          <div className="text-center py-10 border-2 border-dashed rounded-md text-muted-foreground">
+            No tasks found.
+          </div>
+        )}
       </div>
     </div>
   );

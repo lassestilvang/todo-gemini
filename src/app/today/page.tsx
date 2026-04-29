@@ -25,17 +25,21 @@ export default function TodayPage() {
             checked={showCompleted}
             onCheckedChange={setShowCompleted}
           />
-          {/* AddTaskDialog for Today tasks - needs a listId, which is not directly available here. */}
-          {/* <AddTaskDialog listId={inbox.id}>
+          {/* TaskDialog for Today tasks - needs a listId, which is not directly available here. */}
+          {/* <TaskDialog listId={inbox.id}>
             <Button>Add Task</Button>
-          </AddTaskDialog> */}
+          </TaskDialog> */}
         </div>
       </div>
 
       <div className="space-y-2">
-        {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} />
-        ))}
+        {tasks.length > 0 ? (
+          tasks.map((task) => <TaskItem key={task.id} task={task} />)
+        ) : (
+          <div className="text-center py-10 border-2 border-dashed rounded-md text-muted-foreground">
+            No tasks found for today. Enjoy your day!
+          </div>
+        )}
       </div>
     </div>
   );
