@@ -26,7 +26,12 @@ export async function GET(request: NextRequest) {
     query += " AND " + conditions.join(" AND ");
   }
 
-  const tasks = await fetchTasksWithSubtasks(query, params, showCompleted);
+  const tasks = await fetchTasksWithSubtasks(
+    query,
+    params,
+    showCompleted,
+    listId,
+  );
   return NextResponse.json(tasks);
 }
 

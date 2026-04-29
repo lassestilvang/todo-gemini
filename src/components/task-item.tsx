@@ -7,7 +7,15 @@ import { isOverdue, cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/task-store";
 import { TaskDialog } from "./task-dialog";
 import { Button } from "./ui/button";
-import { Plus, History, Trash2, Pencil, Calendar, Clock } from "lucide-react";
+import {
+  Plus,
+  History,
+  Trash2,
+  Pencil,
+  Calendar,
+  Clock,
+  Repeat,
+} from "lucide-react";
 import { TaskHistoryDialog } from "./task-history-dialog";
 import { motion } from "framer-motion"; // Import motion
 import confetti from "canvas-confetti";
@@ -94,6 +102,11 @@ export function TaskItem({ task }: TaskItemProps) {
               <div className="flex items-center text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">
                 <Clock className="w-3 h-3 mr-1" />
                 {Math.floor(task.estimate / 60)}h {task.estimate % 60}m
+              </div>
+            )}
+            {task.recurring && (
+              <div className="flex items-center text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                <Repeat className="w-3 h-3" />
               </div>
             )}
           </div>

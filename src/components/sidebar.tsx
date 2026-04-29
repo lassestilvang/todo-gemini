@@ -37,6 +37,7 @@ import {
 
 import { useKeyboardShortcut } from "@/lib/use-keyboard-shortcuts";
 import { highlightText } from "@/lib/utils";
+import { ThemeToggle } from "./theme-toggle";
 
 const Sidebar = () => {
   const { lists, fetchLists, deleteList } = useListStore();
@@ -237,12 +238,15 @@ const Sidebar = () => {
       </div>
 
       <div className="mt-auto -mx-4 -mb-4 p-4 border-t border-sidebar-border">
-        <div className="flex items-center">
-          <Avatar className="h-8 w-8 mr-2">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <span>Lasse</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Avatar className="h-8 w-8 mr-2">
+              <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <span>Lasse</span>
+          </div>
+          <ThemeToggle />
         </div>
       </div>
     </aside>

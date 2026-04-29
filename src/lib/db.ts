@@ -83,6 +83,7 @@ export async function fetchTasksWithSubtasks(
   query: string,
   params: unknown[],
   showCompleted: boolean,
+  listId?: string | null,
 ): Promise<Task[]> {
   const db = await getDb();
 
@@ -90,24 +91,21 @@ export async function fetchTasksWithSubtasks(
   const topLevelTasks: Task[] = await db.all(query, ...params);
   if (topLevelTasks.length === 0) return [];
 
-  // Helper to get all descendant IDs to fetch all subtasks in one go
-  // Alternatively, we can fetch all tasks that have these topLevelTasks as ancestors
-  // For a simple hierarchy, we'll fetch all tasks that are NOT top-level but belong to the same lists
-  // But a more robust way for any view is to just fetch the children recursively or fetch all related
+  // Optimize: only fetch tasks that could be subtasks.
+  // If we have a listId, we can filter by it.
+  let allTasksQuery = "SELECT * FROM tasks WHERE parentId IS NOT NULL";
+  const allTasksParams: unknown[] = [];
 
-  // Let's stick to a slightly smarter "fetch all children of these parents" approach
-  // or fetch all tasks that might be relevant to the current view.
+  if (!showCompleted) {
+    allTasksQuery += " AND completed = 0";
+  }
 
-  // If we are in a list view, we can just fetch all tasks for that list.
-  // If we are in "Today" etc, it's trickier.
+  if (listId) {
+    allTasksQuery += " AND listId = ?";
+    allTasksParams.push(listId);
+  }
 
-  // For now, let's optimize the "fetch all" by at least filtering by completed if requested.
-  const allTasksQuery = showCompleted
-    ? "SELECT * FROM tasks"
-    : "SELECT * FROM tasks WHERE completed = 0";
-
-  const allTasks: Task[] = await db.all(allTasksQuery);
-
+  const allTasks: Task[] = await db.all(allTasksQuery, ...allTasksParams);
   // Create a map for quick lookup of subtasks
   const taskMap = new Map<string, Task[]>();
   allTasks.forEach((task) => {
