@@ -7,7 +7,7 @@ import { isOverdue, cn } from "@/lib/utils";
 import { useTaskStore } from "@/store/task-store";
 import { AddTaskDialog } from "./add-task-dialog";
 import { Button } from "./ui/button";
-import { Plus, History } from "lucide-react";
+import { Plus, History, Trash2 } from "lucide-react";
 import { TaskHistoryDialog } from "./task-history-dialog";
 import { motion } from "framer-motion"; // Import motion
 
@@ -16,10 +16,16 @@ interface TaskItemProps {
 }
 
 export function TaskItem({ task }: TaskItemProps) {
-  const { updateTask } = useTaskStore();
+  const { updateTask, deleteTask } = useTaskStore();
 
   const handleToggleTask = (taskId: string, completed: boolean) => {
     updateTask(taskId, { completed: !completed });
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (confirm("Are you sure you want to delete this task?")) {
+      await deleteTask(taskId);
+    }
   };
 
   return (
@@ -32,8 +38,8 @@ export function TaskItem({ task }: TaskItemProps) {
     >
       <div
         className={cn(
-          "flex items-center p-2 rounded-md border",
-          isOverdue(task) && "border-red-500"
+          "flex items-center p-2 rounded-md border group",
+          isOverdue(task) && "border-red-500",
         )}
       >
         <Checkbox
@@ -41,11 +47,13 @@ export function TaskItem({ task }: TaskItemProps) {
           onCheckedChange={() => handleToggleTask(task.id, task.completed)}
           className="mr-2"
         />
-        <span className={task.completed ? "line-through text-muted-foreground" : ""}>
+        <span
+          className={task.completed ? "line-through text-muted-foreground" : ""}
+        >
           {task.name}
         </span>
-        
-        <div className="ml-auto flex items-center space-x-1">
+
+        <div className="ml-auto flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {task.history && task.history.length > 0 && (
             <TaskHistoryDialog history={task.history} taskName={task.name}>
               <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -58,6 +66,14 @@ export function TaskItem({ task }: TaskItemProps) {
               <Plus className="h-4 w-4" />
             </Button>
           </AddTaskDialog>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={() => handleDeleteTask(task.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
       {task.subTasks && task.subTasks.length > 0 && (
