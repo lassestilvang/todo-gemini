@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import cuid from "cuid";
+import { createId } from "@paralleldrive/cuid2";
 
 export async function GET() {
   const db = await getDb();
@@ -11,14 +11,14 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const data = await request.json();
   const { name, color, icon } = data;
-  const id = cuid();
+  const id = createId();
   const db = await getDb();
   await db.run(
     "INSERT INTO lists (id, name, color, icon) VALUES (?, ?, ?, ?)",
     id,
     name,
     color,
-    icon
+    icon,
   );
   const newList = await db.get("SELECT * FROM lists WHERE id = ?", id);
   return NextResponse.json(newList, { status: 201 });

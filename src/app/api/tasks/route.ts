@@ -4,7 +4,7 @@ import {
   fetchTasksWithSubtasks,
   createTaskHistoryEntry,
 } from "@/lib/db"; // Import createTaskHistoryEntry
-import cuid from "cuid";
+import { createId } from "@paralleldrive/cuid2";
 import { taskApiSchema } from "@/lib/schemas";
 import { z } from "zod";
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       listId,
       parentId,
     } = body;
-    const id = cuid();
+    const id = createId();
     const db = await getDb();
     await db.run(
       `INSERT INTO tasks (

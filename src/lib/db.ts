@@ -2,7 +2,7 @@ import { open } from "sqlite";
 import sqlite3 from "sqlite3";
 import { Database } from "sqlite";
 import { Task } from "@/types";
-import cuid from "cuid"; // Import cuid
+import { createId } from "@paralleldrive/cuid2";
 
 let db: Database | null = null;
 
@@ -110,7 +110,7 @@ export async function fetchTasksWithSubtasks(
 
 export async function createTaskHistoryEntry(taskId: string, change: string) {
   const db = await getDb();
-  const id = cuid();
+  const id = createId();
   await db.run(
     "INSERT INTO task_history (id, taskId, change) VALUES (?, ?, ?)",
     id,
