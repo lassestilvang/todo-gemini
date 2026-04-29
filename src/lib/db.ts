@@ -86,13 +86,27 @@ export async function fetchTasksWithSubtasks(
 ): Promise<Task[]> {
   const db = await getDb();
 
-  // Fetch the initial set of tasks based on the query
-  const initialTasks: Task[] = await db.all(query, ...params);
-  if (initialTasks.length === 0) return [];
+  // Fetch the initial set of tasks based on the query (top-level tasks)
+  const topLevelTasks: Task[] = await db.all(query, ...params);
+  if (topLevelTasks.length === 0) return [];
 
-  // Fetch all tasks to build the full tree in memory
-  // This avoids N+1 problems. For a local todo app, this is efficient enough.
-  const allTasks: Task[] = await db.all("SELECT * FROM tasks");
+  // Helper to get all descendant IDs to fetch all subtasks in one go
+  // Alternatively, we can fetch all tasks that have these topLevelTasks as ancestors
+  // For a simple hierarchy, we'll fetch all tasks that are NOT top-level but belong to the same lists
+  // But a more robust way for any view is to just fetch the children recursively or fetch all related
+
+  // Let's stick to a slightly smarter "fetch all children of these parents" approach
+  // or fetch all tasks that might be relevant to the current view.
+
+  // If we are in a list view, we can just fetch all tasks for that list.
+  // If we are in "Today" etc, it's trickier.
+
+  // For now, let's optimize the "fetch all" by at least filtering by completed if requested.
+  const allTasksQuery = showCompleted
+    ? "SELECT * FROM tasks"
+    : "SELECT * FROM tasks WHERE completed = 0";
+
+  const allTasks: Task[] = await db.all(allTasksQuery);
 
   // Create a map for quick lookup of subtasks
   const taskMap = new Map<string, Task[]>();
@@ -107,19 +121,14 @@ export async function fetchTasksWithSubtasks(
   // Recursive function to attach subtasks
   const attachSubtasks = (task: Task) => {
     let subTasks = taskMap.get(task.id) || [];
-    if (!showCompleted) {
-      subTasks = subTasks.filter((st) => !st.completed);
-    }
+    // We already filtered by completed in the SQL query if showCompleted is false
     task.subTasks = subTasks.map((st) => attachSubtasks(st));
     return task;
   };
 
-  let results = initialTasks;
-  if (!showCompleted) {
-    results = results.filter((t) => !t.completed);
-  }
-
-  return results.map((t) => attachSubtasks(t));
+  return topLevelTasks
+    .filter((t) => showCompleted || !t.completed)
+    .map((t) => attachSubtasks(t));
 }
 
 export async function createTaskHistoryEntry(taskId: string, change: string) {
