@@ -14,6 +14,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useTaskStore } from "@/store/task-store";
+import { useListStore } from "@/store/list-store"; // Import useListStore
 import { Textarea } from "./ui/textarea";
 import {
   Popover,
@@ -32,9 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Task } from "@/types";
-import { useForm, useWatch } from "react-hook-form"; // Import useForm and useWatch
-import { zodResolver } from "@hookform/resolvers/zod"; // Import zodResolver
-import * as z from "zod"; // Import zod
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 // Define schema for form validation
 const formSchema = z.object({
@@ -42,11 +43,12 @@ const formSchema = z.object({
   description: z.string().nullable(),
   date: z.date().nullable(),
   deadline: z.date().nullable(),
-  reminder: z.string().nullable(), // Added reminder to formSchema
+  reminder: z.string().nullable(),
   estimate: z
     .string()
     .regex(/^\d{2}:\d{2}$/, { message: "Estimate must be in HH:mm format." }),
   priority: z.enum(["NONE", "LOW", "MEDIUM", "HIGH"]),
+  listId: z.string().min(1, { message: "List is required." }), // Added listId
 });
 
 interface TaskDialogProps {
@@ -54,8 +56,8 @@ interface TaskDialogProps {
   listId: string;
   parentId?: string;
   task?: Task;
-  open?: boolean; // Added for external control
-  onOpenChange?: (open: boolean) => void; // Added for external control
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function TaskDialog({
@@ -72,6 +74,7 @@ export function TaskDialog({
     externalOnOpenChange !== undefined ? externalOnOpenChange : setInternalOpen;
 
   const { addTask, updateTask } = useTaskStore();
+  const { lists } = useListStore(); // Get lists
 
   const formatEstimate = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -89,10 +92,11 @@ export function TaskDialog({
       reminder: task?.reminder || null,
       estimate: task ? formatEstimate(task.estimate) : "00:00",
       priority: task?.priority || "NONE",
+      listId: task?.listId || listId, // Default to listId
     },
   });
 
-  // Update form values when task changes (important for edit mode)
+  // Update form values when task changes
   React.useEffect(() => {
     if (task && open) {
       form.reset({
@@ -103,6 +107,7 @@ export function TaskDialog({
         reminder: task.reminder,
         estimate: formatEstimate(task.estimate),
         priority: task.priority,
+        listId: task.listId,
       });
     }
   }, [task, open, form]);
@@ -110,6 +115,7 @@ export function TaskDialog({
   const dateValue = useWatch({ control: form.control, name: "date" });
   const deadlineValue = useWatch({ control: form.control, name: "deadline" });
   const priorityValue = useWatch({ control: form.control, name: "priority" });
+  const currentListId = useWatch({ control: form.control, name: "listId" });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const [hours, minutes] = values.estimate.split(":").map(Number);
@@ -118,7 +124,7 @@ export function TaskDialog({
     const taskData = {
       name: values.name,
       description: values.description,
-      listId,
+      listId: values.listId,
       date: values.date?.toISOString() || null,
       deadline: values.deadline?.toISOString() || null,
       reminder: values.reminder,
@@ -184,6 +190,35 @@ export function TaskDialog({
               {form.formState.errors.description && (
                 <p className="col-span-4 text-right text-red-500 text-sm">
                   {form.formState.errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="listId" className="text-right">
+                Project
+              </Label>
+              <Select
+                value={currentListId}
+                onValueChange={(value) => form.setValue("listId", value)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {lists.map((list) => (
+                    <SelectItem key={list.id} value={list.id}>
+                      <span className="flex items-center">
+                        <span className="mr-2">{list.icon}</span>
+                        {list.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.listId && (
+                <p className="col-span-4 text-right text-red-500 text-sm">
+                  {form.formState.errors.listId.message}
                 </p>
               )}
             </div>
