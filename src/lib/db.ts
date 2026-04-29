@@ -52,6 +52,20 @@ export async function initializeDb() {
         );
     `);
 
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_tasks_listId ON tasks(listId);`,
+  );
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_tasks_parentId ON tasks(parentId);`,
+  );
+  await db.exec(`CREATE INDEX IF NOT EXISTS idx_tasks_date ON tasks(date);`);
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_tasks_deadline ON tasks(deadline);`,
+  );
+  await db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_tasks_completed ON tasks(completed);`,
+  );
+
   await db.exec(`
         CREATE TABLE IF NOT EXISTS task_history (
             id TEXT PRIMARY KEY,
