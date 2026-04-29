@@ -20,9 +20,9 @@ export function isOverdue(task: Task): boolean {
   return false;
 }
 
-export function highlightText(text: string, query: string) {
+export function highlightText(text: string, query: string): string[] {
   if (!query.trim()) {
-    return text;
+    return [text];
   }
   const parts = text.split(new RegExp(`(${query})`, "gi"));
   return parts;

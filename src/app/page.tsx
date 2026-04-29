@@ -9,11 +9,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { TaskItem } from "@/components/task-item"; // Import TaskItem
 
+import { useSettingsStore } from "@/store/settings-store";
+
 export default function Home() {
-  const { tasks, fetchTasks } = useTaskStore(); // Removed updateTask
+  const { tasks, fetchTasks } = useTaskStore();
   const { lists } = useListStore();
+  const { showCompleted, setShowCompleted } = useSettingsStore();
   const inbox = lists.find((list) => list.name === "Inbox");
-  const [showCompleted, setShowCompleted] = useState(true);
 
   useEffect(() => {
     if (inbox) {

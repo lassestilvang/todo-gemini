@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTaskStore } from "@/store/task-store";
+import { useSettingsStore } from "@/store/settings-store";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { TaskItem } from "@/components/task-item"; // Import TaskItem
 
 export default function TodayPage() {
   const { tasks, fetchTodayTasks } = useTaskStore(); // Removed updateTask
-  const [showCompleted, setShowCompleted] = useState(true);
+  const { showCompleted, setShowCompleted } = useSettingsStore();
 
   useEffect(() => {
     fetchTodayTasks(showCompleted);
