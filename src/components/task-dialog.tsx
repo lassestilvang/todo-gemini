@@ -50,10 +50,12 @@ const formSchema = z.object({
 });
 
 interface TaskDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   listId: string;
   parentId?: string;
-  task?: Task; // Added task for editing
+  task?: Task;
+  open?: boolean; // Added for external control
+  onOpenChange?: (open: boolean) => void; // Added for external control
 }
 
 export function TaskDialog({
@@ -61,8 +63,14 @@ export function TaskDialog({
   listId,
   parentId,
   task,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: TaskDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen =
+    externalOnOpenChange !== undefined ? externalOnOpenChange : setInternalOpen;
+
   const { addTask, updateTask } = useTaskStore();
 
   const formatEstimate = (minutes: number) => {

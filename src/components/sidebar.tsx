@@ -35,10 +35,17 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
+import { useKeyboardShortcut } from "@/lib/use-keyboard-shortcuts";
+
 const Sidebar = () => {
   const { lists, fetchLists, deleteList } = useListStore();
   const { searchResults, searchTasks, clearSearchResults } = useTaskStore();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  useKeyboardShortcut("n", () => setIsTaskDialogOpen(true));
+  useKeyboardShortcut("/", () => searchInputRef.current?.focus());
 
   useEffect(() => {
     fetchLists();
@@ -74,20 +81,31 @@ const Sidebar = () => {
       </div>
 
       <div className="mb-6">
-        <TaskDialog listId={lists[0]?.id}>
+        <TaskDialog
+          listId={lists[0]?.id}
+          open={isTaskDialogOpen}
+          onOpenChange={setIsTaskDialogOpen}
+        >
           <Button className="w-full justify-start mb-2">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add task
+            <span className="ml-auto text-xs opacity-50 border px-1 rounded">
+              N
+            </span>
           </Button>
         </TaskDialog>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
+            ref={searchInputRef}
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
+            className="pl-8 pr-8"
           />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] opacity-50 border px-1 rounded pointer-events-none">
+            /
+          </span>
         </div>
         {searchQuery.length > 2 && searchResults.length > 0 && (
           <div className="mt-2 p-2 border rounded-md bg-background">
