@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { Plus, History, Trash2, Pencil } from "lucide-react";
 import { TaskHistoryDialog } from "./task-history-dialog";
 import { motion } from "framer-motion"; // Import motion
+import confetti from "canvas-confetti";
 
 interface TaskItemProps {
   task: Task;
@@ -19,7 +20,17 @@ export function TaskItem({ task }: TaskItemProps) {
   const { updateTask, deleteTask } = useTaskStore();
 
   const handleToggleTask = (taskId: string, completed: boolean) => {
-    updateTask(taskId, { completed: !completed });
+    const newCompleted = !completed;
+    updateTask(taskId, { completed: newCompleted });
+
+    if (newCompleted) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ["#22c55e", "#10b981", "#3b82f6"],
+      });
+    }
   };
 
   const handleDeleteTask = async (taskId: string) => {
