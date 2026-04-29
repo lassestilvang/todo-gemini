@@ -36,6 +36,7 @@ import {
 } from "./ui/dropdown-menu";
 
 import { useKeyboardShortcut } from "@/lib/use-keyboard-shortcuts";
+import { highlightText } from "@/lib/utils";
 
 const Sidebar = () => {
   const { lists, fetchLists, deleteList } = useListStore();
@@ -108,13 +109,31 @@ const Sidebar = () => {
           </span>
         </div>
         {searchQuery.length > 2 && searchResults.length > 0 && (
-          <div className="mt-2 p-2 border rounded-md bg-background">
+          <div className="mt-2 p-2 border rounded-md bg-background max-h-60 overflow-y-auto">
             <h3 className="text-sm font-semibold mb-1">Search Results</h3>
             <ul className="space-y-1">
               {searchResults.map((task) => (
                 <li key={task.id} className="text-sm">
-                  <Link href={`/task/${task.id}`} className="hover:underline">
-                    {task.name}
+                  <Link
+                    href={`/task/${task.id}`}
+                    className="hover:underline block truncate"
+                    onClick={() => {
+                      setSearchQuery("");
+                      clearSearchResults();
+                    }}
+                  >
+                    {highlightText(task.name, searchQuery).map((part, i) => (
+                      <span
+                        key={i}
+                        className={
+                          part.toLowerCase() === searchQuery.toLowerCase()
+                            ? "bg-yellow-500/30 text-yellow-600 font-bold"
+                            : ""
+                        }
+                      >
+                        {part}
+                      </span>
+                    ))}
                   </Link>
                 </li>
               ))}
@@ -130,12 +149,10 @@ const Sidebar = () => {
         >
           <Inbox className="mr-3 h-5 w-5" />
           <span className="flex-1">Inbox</span>
-          {/* <span className="text-xs text-muted-foreground">5</span> */}
         </Link>
         <Link href="/today" className="flex items-center p-2 rounded-md">
           <Calendar className="mr-3 h-5 w-5" />
           <span className="flex-1">Today</span>
-          {/* <span className="text-xs text-muted-foreground">2</span> */}
         </Link>
         <Link href="/next-7-days" className="flex items-center p-2 rounded-md">
           <CalendarDays className="mr-3 h-5 w-5" />
@@ -165,7 +182,6 @@ const Sidebar = () => {
             <Link href="/all" className="flex items-center text-sm">
               <Star className="mr-3 h-4 w-4 text-yellow-500" />
               <span className="flex-1">All Tasks</span>
-              {/* <span className="text-xs text-muted-foreground">12</span> */}
             </Link>
           </CollapsibleContent>
         </Collapsible>
