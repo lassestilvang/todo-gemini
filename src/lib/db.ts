@@ -116,9 +116,8 @@ export async function fetchTasksWithSubtasks(
     }
   });
 
-  // Recursive function to attach subtasks
   const attachSubtasks = (task: Task) => {
-    let subTasks = taskMap.get(task.id) || [];
+    const subTasks = taskMap.get(task.id) || [];
     // We already filtered by completed in the SQL query if showCompleted is false
     task.subTasks = subTasks.map((st) => attachSubtasks(st));
     return task;

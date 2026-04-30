@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTaskStore } from "@/store/task-store";
 import { useListStore } from "@/store/list-store";
 import { Button } from "@/components/ui/button";
@@ -97,7 +97,7 @@ export default function Home() {
           sortedTasks.map((task) => <TaskItem key={task.id} task={task} />)
         ) : (
           <div className="text-center py-10 border-2 border-dashed rounded-md text-muted-foreground">
-            No tasks found. Click "Add Task" to get started!
+            No tasks found. Click &quot;Add Task&quot; to get started!
           </div>
         )}
       </div>
