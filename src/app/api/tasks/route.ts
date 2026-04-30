@@ -9,30 +9,38 @@ import { taskApiSchema } from "@/lib/schemas";
 import { z } from "zod";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const listId = searchParams.get("listId");
-  const showCompleted = searchParams.get("showCompleted") === "true"; // Convert to boolean
+  try {
+    const { searchParams } = new URL(request.url);
+    const listId = searchParams.get("listId");
+    const showCompleted = searchParams.get("showCompleted") === "true"; // Convert to boolean
 
-  let query = "SELECT * FROM tasks WHERE parentId IS NULL"; // Only fetch top-level tasks
-  const params = [];
-  const conditions = [];
+    let query = "SELECT * FROM tasks WHERE parentId IS NULL"; // Only fetch top-level tasks
+    const params = [];
+    const conditions = [];
 
-  if (listId) {
-    conditions.push("listId = ?");
-    params.push(listId);
+    if (listId) {
+      conditions.push("listId = ?");
+      params.push(listId);
+    }
+
+    if (conditions.length > 0) {
+      query += " AND " + conditions.join(" AND ");
+    }
+
+    const tasks = await fetchTasksWithSubtasks(
+      query,
+      params,
+      showCompleted,
+      listId,
+    );
+    return NextResponse.json(tasks);
+  } catch (error) {
+    console.error("Tasks GET API error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
-
-  if (conditions.length > 0) {
-    query += " AND " + conditions.join(" AND ");
-  }
-
-  const tasks = await fetchTasksWithSubtasks(
-    query,
-    params,
-    showCompleted,
-    listId,
-  );
-  return NextResponse.json(tasks);
 }
 
 export async function POST(request: NextRequest) {
