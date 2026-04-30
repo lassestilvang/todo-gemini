@@ -33,13 +33,20 @@ export function sortTasks(tasks: Task[], sortBy: string): Task[] {
 
   return [...tasks].sort((a, b) => {
     switch (sortBy) {
-      case "priority":
+      case "priority": {
+        const priorityDiff = priorityMap[b.priority] - priorityMap[a.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        // If priority is same, sort by date
+        return (a.deadline || a.date || "").localeCompare(
+          b.deadline || b.date || "",
+        );
+      }
+      case "date": {
+        const dateA = a.deadline || a.date || "9999-12-31";
+        const dateB = b.deadline || b.date || "9999-12-31";
+        if (dateA !== dateB) return dateA.localeCompare(dateB);
         return priorityMap[b.priority] - priorityMap[a.priority];
-      case "date":
-        if (!a.deadline && !b.deadline) return 0;
-        if (!a.deadline) return 1;
-        if (!b.deadline) return -1;
-        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      }
       case "name":
         return a.name.localeCompare(b.name);
       case "createdAt":
@@ -49,4 +56,15 @@ export function sortTasks(tasks: Task[], sortBy: string): Task[] {
         );
     }
   });
+}
+
+export function formatDuration(minutes: number): string {
+  if (minutes <= 0) return "";
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${remainingMinutes > 0 ? `${remainingMinutes}m` : ""}`.trim();
+  }
+  return `${minutes}m`;
 }
