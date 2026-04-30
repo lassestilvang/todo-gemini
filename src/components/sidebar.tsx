@@ -40,17 +40,26 @@ import { highlightText } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 
 const Sidebar = () => {
-  const { lists, fetchLists, deleteList } = useListStore();
+  const {
+    lists,
+    fetchLists,
+    deleteList,
+    isLoading: isListLoading,
+    error: listError,
+  } = useListStore();
   const {
     searchResults,
     searchTasks,
     clearSearchResults,
     counts,
     fetchCounts,
+    isLoading: isTaskLoading,
   } = useTaskStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  const inboxList = lists.find((l) => l.name === "Inbox") || lists[0];
 
   useKeyboardShortcut("n", () => setIsTaskDialogOpen(true));
   useKeyboardShortcut("/", () => searchInputRef.current?.focus());
@@ -91,11 +100,11 @@ const Sidebar = () => {
 
       <div className="mb-6">
         <TaskDialog
-          listId={lists[0]?.id}
+          listId={inboxList?.id}
           open={isTaskDialogOpen}
           onOpenChange={setIsTaskDialogOpen}
         >
-          <Button className="w-full justify-start mb-2">
+          <Button className="w-full justify-start mb-2" disabled={!inboxList}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add task
             <span className="ml-auto text-xs opacity-50 border px-1 rounded">
@@ -206,15 +215,22 @@ const Sidebar = () => {
                 </span>
               )}
             </Link>
-          </CollapsibleContent>
-        </Collapsible>
+          <div className="space-y-4">
+            {listError && (
+              <p className="text-xs text-destructive text-center mb-2">{listError}</p>
+            )}
+            <Collapsible>
+          ...
+            <Collapsible defaultOpen>
+              <div className="w-full flex items-center text-sm font-semibold justify-between">
+                <CollapsibleTrigger className="flex items-center">
+                  <ChevronDown className="mr-2 h-4 w-4" />
+                  My Projects
+                  {(isListLoading || isTaskLoading) && (
+                    <span className="ml-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  )}
+                </CollapsibleTrigger>
 
-        <Collapsible defaultOpen>
-          <div className="w-full flex items-center text-sm font-semibold justify-between">
-            <CollapsibleTrigger className="flex items-center">
-              <ChevronDown className="mr-2 h-4 w-4" />
-              My Projects
-            </CollapsibleTrigger>
             <AddListDialog>
               <Button variant="ghost" size="icon">
                 <Plus className="h-4 w-4" />
