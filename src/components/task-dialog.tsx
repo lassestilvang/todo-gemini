@@ -73,7 +73,7 @@ export function TaskDialog({
   const setOpen =
     externalOnOpenChange !== undefined ? externalOnOpenChange : setInternalOpen;
 
-  const { addTask, updateTask } = useTaskStore();
+  const { addTask, updateTask, isLoading } = useTaskStore();
   const { lists } = useListStore(); // Get lists
 
   const formatEstimate = (minutes: number) => {
@@ -342,7 +342,9 @@ export function TaskDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Save Task</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save Task"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
