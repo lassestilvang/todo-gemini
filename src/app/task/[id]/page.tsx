@@ -5,7 +5,8 @@ import { useTaskStore } from "@/store/task-store";
 import { Task } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
-import { isOverdue, cn } from "@/lib/utils";
+import { isOverdue, cn, formatDuration } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface TaskPageProps {
   params: Promise<{
@@ -15,17 +16,17 @@ interface TaskPageProps {
 
 export default function TaskPage({ params }: TaskPageProps) {
   const [task, setTask] = useState<Task | null>(null);
-  const { updateTask } = useTaskStore();
+  const { fetchTaskById, updateTask, isLoading, error } = useTaskStore();
+
+  const loadTask = async () => {
+    const { id } = await params;
+    const data = await fetchTaskById(id);
+    setTask(data);
+  };
 
   useEffect(() => {
-    const fetchTask = async () => {
-      const { id } = await params;
-      const response = await fetch(`/api/tasks/${id}`);
-      const data = await response.json();
-      setTask(data);
-    };
-    fetchTask();
-  }, [params]);
+    loadTask();
+  }, [params, fetchTaskById]);
 
   const handleToggleTask = async (taskId: string, completed: boolean) => {
     if (task) {
@@ -36,8 +37,31 @@ export default function TaskPage({ params }: TaskPageProps) {
     }
   };
 
+  if (isLoading && !task) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <span className="text-muted-foreground animate-pulse">
+          Loading task...
+        </span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <p className="text-destructive mb-4">{error}</p>
+        <Button onClick={loadTask}>Retry</Button>
+      </div>
+    );
+  }
+
   if (!task) {
-    return <div>Loading task...</div>;
+    return (
+      <div className="text-center py-20 text-muted-foreground">
+        Task not found.
+      </div>
+    );
   }
 
   return (
@@ -63,11 +87,7 @@ export default function TaskPage({ params }: TaskPageProps) {
       {task.deadline && (
         <p>Deadline: {format(new Date(task.deadline), "PPP")}</p>
       )}
-      {task.estimate !== undefined && (
-        <p>
-          Estimate: {Math.floor(task.estimate / 60)}h {task.estimate % 60}m
-        </p>
-      )}
+      {task.estimate > 0 && <p>Estimate: {formatDuration(task.estimate)}</p>}
       {task.priority && <p>Priority: {task.priority}</p>}
       {isOverdue(task) && (
         <p className="text-red-500 font-semibold">Overdue!</p>
