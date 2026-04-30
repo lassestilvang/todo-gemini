@@ -21,7 +21,7 @@ import {
 import { ArrowUpDown } from "lucide-react";
 
 export default function Home() {
-  const { tasks, fetchTasks } = useTaskStore();
+  const { tasks, fetchTasks, isLoading, error } = useTaskStore();
   const { lists } = useListStore();
   const { showCompleted, setShowCompleted, sortBy, setSortBy } =
     useSettingsStore();
@@ -35,11 +35,27 @@ export default function Home() {
 
   const sortedTasks = sortTasks(tasks, sortBy);
 
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <p className="text-destructive mb-4">{error}</p>
+        <Button onClick={() => inbox && fetchTasks(inbox.id, showCompleted)}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Inbox</h1>
         <div className="flex items-center space-x-4">
+          {isLoading && (
+            <span className="text-xs text-muted-foreground animate-pulse">
+              Loading...
+            </span>
+          )}
           <div className="flex items-center space-x-2">
             <Label htmlFor="show-completed" className="text-sm">
               Show Completed
