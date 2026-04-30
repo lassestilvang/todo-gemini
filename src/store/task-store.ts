@@ -31,6 +31,7 @@ interface TaskState {
   updateTask: (taskId: string, updatedTask: Partial<Task>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   setError: (error: string | null) => void;
+  fetchTaskById: (taskId: string) => Promise<TaskWithRelations | null>;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -239,4 +240,20 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
   setError: (error) => set({ error }),
+  fetchTaskById: async (taskId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`);
+      if (!response.ok) throw new Error("Failed to fetch task");
+      const task = await response.json();
+      return task;
+    } catch (err) {
+      set({
+        error: err instanceof Error ? err.message : "Failed to fetch task",
+      });
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));
