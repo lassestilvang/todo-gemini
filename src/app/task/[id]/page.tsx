@@ -18,13 +18,12 @@ export default function TaskPage({ params }: TaskPageProps) {
   const [task, setTask] = useState<Task | null>(null);
   const { fetchTaskById, updateTask, isLoading, error } = useTaskStore();
 
-  const loadTask = async () => {
-    const { id } = await params;
-    const data = await fetchTaskById(id);
-    setTask(data);
-  };
-
   useEffect(() => {
+    const loadTask = async () => {
+      const { id } = await params;
+      const data = await fetchTaskById(id);
+      setTask(data);
+    };
     loadTask();
   }, [params, fetchTaskById]);
 

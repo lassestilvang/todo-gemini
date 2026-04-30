@@ -159,7 +159,7 @@ const Sidebar = () => {
         )}
       </div>
 
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 space-y-2 overflow-y-auto">
         <Link
           href="/"
           className="flex items-center p-2 rounded-md bg-sidebar-accent text-sidebar-accent-foreground"
@@ -197,88 +197,87 @@ const Sidebar = () => {
           <CheckCircle className="mr-3 h-5 w-5" />
           <span>Completed</span>
         </Link>
-      </nav>
 
-      <div className="space-y-4">
-        <Collapsible>
-          <CollapsibleTrigger className="w-full flex items-center text-sm font-semibold">
-            <ChevronDown className="mr-2 h-4 w-4" />
-            Favorites
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pl-6 space-y-2 mt-2">
-            <Link href="/all" className="flex items-center text-sm">
-              <Star className="mr-3 h-4 w-4 text-yellow-500" />
-              <span className="flex-1">All Tasks</span>
-              {counts.all > 0 && (
-                <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
-                  {counts.all}
-                </span>
-              )}
-            </Link>
-          <div className="space-y-4">
-            {listError && (
-              <p className="text-xs text-destructive text-center mb-2">{listError}</p>
-            )}
-            <Collapsible>
-          ...
-            <Collapsible defaultOpen>
-              <div className="w-full flex items-center text-sm font-semibold justify-between">
-                <CollapsibleTrigger className="flex items-center">
-                  <ChevronDown className="mr-2 h-4 w-4" />
-                  My Projects
-                  {(isListLoading || isTaskLoading) && (
-                    <span className="ml-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  )}
-                </CollapsibleTrigger>
-
-            <AddListDialog>
-              <Button variant="ghost" size="icon">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </AddListDialog>
-          </div>
-          <CollapsibleContent className="pl-6 space-y-2 mt-2">
-            {lists.map((list) => (
-              <div key={list.id} className="flex items-center text-sm group">
-                <Link href="#" className="flex-1 flex items-center">
-                  <span
-                    className="mr-3 h-4 w-4 text-center"
-                    style={{ color: list.color }}
-                  >
-                    {list.icon}
+        <div className="pt-4 space-y-4">
+          <Collapsible defaultOpen>
+            <CollapsibleTrigger className="w-full flex items-center text-sm font-semibold">
+              <ChevronDown className="mr-2 h-4 w-4" />
+              Favorites
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pl-6 space-y-2 mt-2">
+              <Link href="/all" className="flex items-center text-sm">
+                <Star className="mr-3 h-4 w-4 text-yellow-500" />
+                <span className="flex-1">All Tasks</span>
+                {counts.all > 0 && (
+                  <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+                    {counts.all}
                   </span>
-                  <span className="flex-1">{list.name}</span>
-                  {list.taskCount !== undefined && list.taskCount > 0 && (
-                    <span className="text-[10px] text-muted-foreground bg-muted px-1 py-0.5 rounded-full min-w-[1.25rem] text-center mr-2">
-                      {list.taskCount}
+                )}
+              </Link>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Collapsible defaultOpen>
+            <div className="w-full flex items-center text-sm font-semibold justify-between">
+              <CollapsibleTrigger className="flex items-center">
+                <ChevronDown className="mr-2 h-4 w-4" />
+                My Projects
+                {(isListLoading || isTaskLoading) && (
+                  <span className="ml-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                )}
+              </CollapsibleTrigger>
+              <AddListDialog>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </AddListDialog>
+            </div>
+            {listError && (
+              <p className="text-[10px] text-destructive mt-1">{listError}</p>
+            )}
+            <CollapsibleContent className="pl-6 space-y-2 mt-2">
+              {lists.map((list) => (
+                <div key={list.id} className="flex items-center text-sm group">
+                  <Link href="#" className="flex-1 flex items-center">
+                    <span
+                      className="mr-3 h-4 w-4 text-center"
+                      style={{ color: list.color }}
+                    >
+                      {list.icon}
                     </span>
-                  )}
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={(e) => handleDeleteList(e, list.id)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete List
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ))}
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
+                    <span className="flex-1 truncate">{list.name}</span>
+                    {list.taskCount !== undefined && list.taskCount > 0 && (
+                      <span className="text-[10px] text-muted-foreground bg-muted px-1 py-0.5 rounded-full min-w-[1.25rem] text-center mr-2">
+                        {list.taskCount}
+                      </span>
+                    )}
+                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={(e) => handleDeleteList(e, list.id)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete List
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      </nav>
 
       <div className="mt-auto -mx-4 -mb-4 p-4 border-t border-sidebar-border">
         <div className="flex items-center justify-between">
@@ -287,7 +286,7 @@ const Sidebar = () => {
               <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <span>Lasse</span>
+            <span className="text-sm font-medium">Lasse</span>
           </div>
           <ThemeToggle />
         </div>
