@@ -21,8 +21,13 @@ import * as z from "zod"; // Import zod
 // Define schema for form validation
 const formSchema = z.object({
   name: z.string().min(1, { message: "List name is required." }),
-  color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, { message: "Invalid color format." }),
-  icon: z.string().min(1, { message: "Icon is required." }).max(2, { message: "Icon must be an emoji (1 or 2 characters)." }),
+  color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
+    message: "Invalid color format.",
+  }),
+  icon: z
+    .string()
+    .min(1, { message: "Icon is required." })
+    .max(2, { message: "Icon must be an emoji (1 or 2 characters)." }),
 });
 
 interface AddListDialogProps {
@@ -31,7 +36,7 @@ interface AddListDialogProps {
 
 export function AddListDialog({ children }: AddListDialogProps) {
   const [open, setOpen] = useState(false);
-  const { addList } = useListStore();
+  const { addList, isLoading } = useListStore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -112,7 +117,9 @@ export function AddListDialog({ children }: AddListDialogProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Save List</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save List"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
