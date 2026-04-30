@@ -16,3 +16,12 @@ export const taskApiSchema = z.object({
 export const taskUpdateApiSchema = taskApiSchema
   .partial()
   .omit({ listId: true });
+
+export const listApiSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format")
+    .optional(),
+  icon: z.string().optional(),
+});

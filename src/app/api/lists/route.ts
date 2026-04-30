@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { createId } from "@paralleldrive/cuid2";
+import { listApiSchema } from "@/lib/schemas";
+import { z } from "zod";
 
 export async function GET() {
   const db = await getDb();
@@ -14,17 +16,28 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
-  const { name, color, icon } = data;
-  const id = createId();
-  const db = await getDb();
-  await db.run(
-    "INSERT INTO lists (id, name, color, icon) VALUES (?, ?, ?, ?)",
-    id,
-    name,
-    color,
-    icon,
-  );
-  const newList = await db.get("SELECT * FROM lists WHERE id = ?", id);
-  return NextResponse.json(newList, { status: 201 });
+  try {
+    const json = await request.json();
+    const body = listApiSchema.parse(json);
+    const { name, color, icon } = body;
+    const id = createId();
+    const db = await getDb();
+    await db.run(
+      "INSERT INTO lists (id, name, color, icon) VALUES (?, ?, ?, ?)",
+      id,
+      name,
+      color ?? "#ffffff",
+      icon ?? "📝",
+    );
+    const newList = await db.get("SELECT * FROM lists WHERE id = ?", id);
+    return NextResponse.json(newList, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.issues }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }
