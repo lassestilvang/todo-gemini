@@ -3,7 +3,7 @@
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Task } from "@/types";
-import { isOverdue, cn } from "@/lib/utils";
+import { isOverdue, cn, formatDuration } from "@/lib/utils";
 import { useTaskStore } from "@/store/task-store";
 import { TaskDialog } from "./task-dialog";
 import { Button } from "./ui/button";
@@ -101,7 +101,7 @@ export function TaskItem({ task }: TaskItemProps) {
             {task.estimate > 0 && (
               <div className="flex items-center text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">
                 <Clock className="w-3 h-3 mr-1" />
-                {Math.floor(task.estimate / 60)}h {task.estimate % 60}m
+                {formatDuration(task.estimate)}
               </div>
             )}
             {task.recurring && (
