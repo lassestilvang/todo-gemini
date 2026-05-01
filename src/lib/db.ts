@@ -91,24 +91,32 @@ export async function fetchTasksWithSubtasks(
   const topLevelTasks: Task[] = await db.all(query, ...params);
   if (topLevelTasks.length === 0) return [];
 
-  // Optimize: only fetch tasks that could be subtasks.
-  // If we have a listId, we can filter by it.
-  let allTasksQuery = "SELECT * FROM tasks WHERE parentId IS NOT NULL";
-  const allTasksParams: unknown[] = [];
+  const topLevelIds = topLevelTasks.map((t) => t.id);
+  const placeholders = topLevelIds.map(() => "?").join(",");
 
-  if (!showCompleted) {
-    allTasksQuery += " AND completed = 0";
-  }
+  // Use a recursive CTE to fetch all descendants of the top-level tasks
+  const descendantsQuery = `
+    WITH RECURSIVE subordinates AS (
+      SELECT * FROM tasks WHERE parentId IN (${placeholders})
+      UNION ALL
+      SELECT t.* FROM tasks t INNER JOIN subordinates s ON t.parentId = s.id
+    )
+    SELECT * FROM subordinates WHERE 1=1
+    ${!showCompleted ? " AND completed = 0" : ""}
+    ${listId ? " AND listId = ?" : ""}
+  `;
 
-  if (listId) {
-    allTasksQuery += " AND listId = ?";
-    allTasksParams.push(listId);
-  }
+  const descendantsParams = [...topLevelIds];
+  if (listId) descendantsParams.push(listId);
 
-  const allTasks: Task[] = await db.all(allTasksQuery, ...allTasksParams);
+  const allSubtasks: Task[] = await db.all(
+    descendantsQuery,
+    ...descendantsParams,
+  );
+
   // Create a map for quick lookup of subtasks
   const taskMap = new Map<string, Task[]>();
-  allTasks.forEach((task) => {
+  allSubtasks.forEach((task) => {
     if (task.parentId) {
       const children = taskMap.get(task.parentId) || [];
       children.push(task);
@@ -116,16 +124,13 @@ export async function fetchTasksWithSubtasks(
     }
   });
 
-  const attachSubtasks = (task: Task) => {
+  const attachSubtasks = (task: Task): Task => {
     const subTasks = taskMap.get(task.id) || [];
-    // We already filtered by completed in the SQL query if showCompleted is false
     task.subTasks = subTasks.map((st) => attachSubtasks(st));
     return task;
   };
 
-  return topLevelTasks
-    .filter((t) => showCompleted || !t.completed)
-    .map((t) => attachSubtasks(t));
+  return topLevelTasks.map((t) => attachSubtasks(t));
 }
 
 export async function createTaskHistoryEntry(taskId: string, change: string) {
