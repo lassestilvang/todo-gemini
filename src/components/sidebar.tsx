@@ -14,6 +14,7 @@ import {
 import { AddListDialog } from "./add-list-dialog";
 import { TaskDialog } from "./task-dialog";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Inbox,
   Calendar,
@@ -60,9 +61,14 @@ const Sidebar = () => {
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const inboxList = lists.find((l) => l.name === "Inbox") || lists[0];
+  const router = useRouter();
 
   useKeyboardShortcut("n", () => setIsTaskDialogOpen(true));
   useKeyboardShortcut("/", () => searchInputRef.current?.focus());
+  useKeyboardShortcut("g t", () => router.push("/today"));
+  useKeyboardShortcut("g u", () => router.push("/upcoming"));
+  useKeyboardShortcut("g i", () => router.push("/"));
+  useKeyboardShortcut("g a", () => router.push("/all"));
 
   useEffect(() => {
     fetchLists();
