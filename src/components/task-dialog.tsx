@@ -176,6 +176,7 @@ export function TaskDialog({
                 id="name"
                 {...form.register("name")}
                 className="col-span-3"
+                autoFocus
               />
               {form.formState.errors.name && (
                 <p className="col-span-4 text-right text-red-500 text-sm">
