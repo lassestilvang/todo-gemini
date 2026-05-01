@@ -9,7 +9,13 @@ export async function GET(
 ) {
   const { id } = await params;
   const db = await getDb();
-  const task = await db.get("SELECT * FROM tasks WHERE id = ?", id);
+  const task = await db.get(
+    `SELECT t.*, l.name as listName, l.color as listColor
+     FROM tasks t
+     LEFT JOIN lists l ON t.listId = l.id
+     WHERE t.id = ?`,
+    id,
+  );
   if (!task) {
     return NextResponse.json({ error: "Task not found" }, { status: 404 });
   }
@@ -75,7 +81,13 @@ export async function PUT(
       await createTaskHistoryEntry(id, change);
     }
 
-    const updatedTask = await db.get("SELECT * FROM tasks WHERE id = ?", id);
+    const updatedTask = await db.get(
+      `SELECT t.*, l.name as listName, l.color as listColor
+       FROM tasks t
+       LEFT JOIN lists l ON t.listId = l.id
+       WHERE t.id = ?`,
+      id,
+    );
     return NextResponse.json({ ...updatedTask });
   } catch (error) {
     if (error instanceof z.ZodError) {

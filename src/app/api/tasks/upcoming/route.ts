@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
     const showCompleted = searchParams.get("showCompleted") === "true"; // Convert to boolean
     const today = format(new Date(), "yyyy-MM-dd");
 
-    const query = "SELECT * FROM tasks WHERE date > ? AND parentId IS NULL";
+    const query = `
+      SELECT t.*, l.name as listName, l.color as listColor
+      FROM tasks t
+      LEFT JOIN lists l ON t.listId = l.id
+      WHERE t.date > ? AND t.parentId IS NULL
+    `;
     const params = [today];
 
     const tasks = await fetchTasksWithSubtasks(query, params, showCompleted);

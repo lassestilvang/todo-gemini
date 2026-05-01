@@ -101,9 +101,12 @@ export async function fetchTasksWithSubtasks(
       UNION ALL
       SELECT t.* FROM tasks t INNER JOIN subordinates s ON t.parentId = s.id
     )
-    SELECT * FROM subordinates WHERE 1=1
-    ${!showCompleted ? " AND completed = 0" : ""}
-    ${listId ? " AND listId = ?" : ""}
+    SELECT s.*, l.name as listName, l.color as listColor
+    FROM subordinates s
+    LEFT JOIN lists l ON s.listId = l.id
+    WHERE 1=1
+    ${!showCompleted ? " AND s.completed = 0" : ""}
+    ${listId ? " AND s.listId = ?" : ""}
   `;
 
   const descendantsParams = [...topLevelIds];

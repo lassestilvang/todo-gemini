@@ -14,12 +14,17 @@ export async function GET(request: NextRequest) {
     const listId = searchParams.get("listId");
     const showCompleted = searchParams.get("showCompleted") === "true"; // Convert to boolean
 
-    let query = "SELECT * FROM tasks WHERE parentId IS NULL"; // Only fetch top-level tasks
+    let query = `
+      SELECT t.*, l.name as listName, l.color as listColor
+      FROM tasks t
+      LEFT JOIN lists l ON t.listId = l.id
+      WHERE t.parentId IS NULL
+    `;
     const params = [];
     const conditions = [];
 
     if (listId) {
-      conditions.push("listId = ?");
+      conditions.push("t.listId = ?");
       params.push(listId);
     }
 

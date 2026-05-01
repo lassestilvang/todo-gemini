@@ -109,6 +109,14 @@ export function TaskItem({ task }: TaskItemProps) {
                 <Repeat className="w-3 h-3" />
               </div>
             )}
+            {task.listName && (
+              <div
+                className="text-[10px] px-1.5 py-0.5 rounded text-white font-medium"
+                style={{ backgroundColor: task.listColor || "#a1a1aa" }}
+              >
+                {task.listName}
+              </div>
+            )}
           </div>
         </div>
 

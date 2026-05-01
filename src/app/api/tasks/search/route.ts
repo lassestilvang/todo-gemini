@@ -11,8 +11,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Search for top-level tasks that match the query
-    const sql =
-      "SELECT * FROM tasks WHERE (name LIKE ? OR description LIKE ?) AND parentId IS NULL";
+    const sql = `
+      SELECT t.*, l.name as listName, l.color as listColor
+      FROM tasks t
+      LEFT JOIN lists l ON t.listId = l.id
+      WHERE (t.name LIKE ? OR t.description LIKE ?) AND t.parentId IS NULL
+    `;
     const params = [`%${query}%`, `%${query}%`];
 
     const tasks = await fetchTasksWithSubtasks(sql, params, true); // Always show completed in search?

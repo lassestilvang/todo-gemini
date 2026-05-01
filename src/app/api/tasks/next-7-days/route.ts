@@ -10,8 +10,12 @@ export async function GET(request: NextRequest) {
     const next7Days = format(addDays(today, 7), "yyyy-MM-dd");
     const formattedToday = format(today, "yyyy-MM-dd");
 
-    const query =
-      "SELECT * FROM tasks WHERE date >= ? AND date <= ? AND parentId IS NULL"; // Only fetch top-level tasks
+    const query = `
+      SELECT t.*, l.name as listName, l.color as listColor
+      FROM tasks t
+      LEFT JOIN lists l ON t.listId = l.id
+      WHERE t.date >= ? AND t.date <= ? AND t.parentId IS NULL
+    `;
     const params = [formattedToday, next7Days];
 
     const tasks = await fetchTasksWithSubtasks(query, params, showCompleted);

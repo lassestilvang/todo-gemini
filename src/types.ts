@@ -24,6 +24,8 @@ export interface Task {
   updatedAt: string;
   listId: string;
   parentId: string | null;
+  listName?: string; // Added listName
+  listColor?: string; // Added listColor
   subTasks?: Task[]; // Added subTasks
   history?: TaskHistory[]; // Added history
 }
