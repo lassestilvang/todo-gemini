@@ -86,10 +86,24 @@ export function TaskItem({ task }: TaskItemProps) {
             {task.name}
           </span>
           {task.subTasks && task.subTasks.length > 0 && (
-            <span className="ml-2 text-xs text-muted-foreground">
-              ({task.subTasks.filter((st) => st.completed).length}/
-              {task.subTasks.length})
-            </span>
+            <div className="ml-2 flex flex-col gap-1">
+              <span className="text-[10px] text-muted-foreground leading-none">
+                {task.subTasks.filter((st) => st.completed).length}/
+                {task.subTasks.length}
+              </span>
+              <div className="w-16 h-1 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{
+                    width: `${
+                      (task.subTasks.filter((st) => st.completed).length /
+                        task.subTasks.length) *
+                      100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
           )}
           <div className="ml-4 flex items-center space-x-2">
             {task.deadline && (
