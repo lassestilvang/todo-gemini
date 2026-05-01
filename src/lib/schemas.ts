@@ -11,6 +11,7 @@ export const taskApiSchema = z.object({
   listId: z.string(),
   parentId: z.string().nullable().optional(),
   completed: z.boolean().optional(),
+  recurring: z.string().nullable().optional(),
 });
 
 export const taskUpdateApiSchema = taskApiSchema

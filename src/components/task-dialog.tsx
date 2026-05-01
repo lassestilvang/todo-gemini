@@ -49,6 +49,7 @@ const formSchema = z.object({
     .regex(/^\d{2}:\d{2}$/, { message: "Estimate must be in HH:mm format." }),
   priority: z.enum(["NONE", "LOW", "MEDIUM", "HIGH"]),
   listId: z.string().min(1, { message: "List is required." }), // Added listId
+  recurring: z.enum(["NONE", "DAILY", "WEEKLY", "MONTHLY"]),
 });
 
 interface TaskDialogProps {
@@ -93,6 +94,7 @@ export function TaskDialog({
       estimate: task ? formatEstimate(task.estimate) : "00:00",
       priority: task?.priority || "NONE",
       listId: task?.listId || listId, // Default to listId
+      recurring: (task?.recurring as any) || "NONE",
     },
   });
 
@@ -108,6 +110,7 @@ export function TaskDialog({
         estimate: formatEstimate(task.estimate),
         priority: task.priority,
         listId: task.listId,
+        recurring: (task.recurring as any) || "NONE",
       });
     }
   }, [task, open, form]);
@@ -116,6 +119,7 @@ export function TaskDialog({
   const deadlineValue = useWatch({ control: form.control, name: "deadline" });
   const priorityValue = useWatch({ control: form.control, name: "priority" });
   const currentListId = useWatch({ control: form.control, name: "listId" });
+  const recurringValue = useWatch({ control: form.control, name: "recurring" });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const [hours, minutes] = values.estimate.split(":").map(Number);
@@ -131,6 +135,7 @@ export function TaskDialog({
       estimate: estimateInMinutes,
       priority: values.priority,
       parentId: parentId || task?.parentId || null,
+      recurring: values.recurring === "NONE" ? null : values.recurring,
     };
 
     if (task) {
@@ -339,6 +344,28 @@ export function TaskDialog({
                   {form.formState.errors.priority.message}
                 </p>
               )}
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="recurring" className="text-right">
+                Recurring
+              </Label>
+              <Select
+                value={recurringValue}
+                onValueChange={(
+                  value: "NONE" | "DAILY" | "WEEKLY" | "MONTHLY",
+                ) => form.setValue("recurring", value)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select recurring" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">None</SelectItem>
+                  <SelectItem value="DAILY">Daily</SelectItem>
+                  <SelectItem value="WEEKLY">Weekly</SelectItem>
+                  <SelectItem value="MONTHLY">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

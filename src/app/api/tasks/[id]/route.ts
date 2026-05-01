@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb, createTaskHistoryEntry } from "@/lib/db"; // Import createTaskHistoryEntry
 import { taskUpdateApiSchema } from "@/lib/schemas";
 import { z } from "zod";
+import { addDays, addWeeks, addMonths, parseISO } from "date-fns";
+import { createId } from "@paralleldrive/cuid2";
 
 export async function GET(
   request: NextRequest,
@@ -79,6 +81,52 @@ export async function PUT(
     // Create history entries for all changes
     for (const change of changes) {
       await createTaskHistoryEntry(id, change);
+    }
+
+    // Handle Recurring tasks
+    if (body.completed === true) {
+      const task = await db.get("SELECT * FROM tasks WHERE id = ?", id);
+      if (task && task.recurring && task.recurring !== "NONE") {
+        const nextId = createId();
+        let nextDate = task.date ? parseISO(task.date) : new Date();
+        let nextDeadline = task.deadline ? parseISO(task.deadline) : null;
+
+        switch (task.recurring) {
+          case "DAILY":
+            nextDate = addDays(nextDate, 1);
+            if (nextDeadline) nextDeadline = addDays(nextDeadline, 1);
+            break;
+          case "WEEKLY":
+            nextDate = addWeeks(nextDate, 1);
+            if (nextDeadline) nextDeadline = addWeeks(nextDeadline, 1);
+            break;
+          case "MONTHLY":
+            nextDate = addMonths(nextDate, 1);
+            if (nextDeadline) nextDeadline = addMonths(nextDeadline, 1);
+            break;
+        }
+
+        await db.run(
+          `INSERT INTO tasks (
+            id, name, description, date, deadline, reminder, estimate, priority, listId, parentId, recurring
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          nextId,
+          task.name,
+          task.description,
+          nextDate.toISOString(),
+          nextDeadline?.toISOString() || null,
+          task.reminder,
+          task.estimate,
+          task.priority,
+          task.listId,
+          task.parentId,
+          task.recurring,
+        );
+        await createTaskHistoryEntry(
+          nextId,
+          `Task created (Recurring from ${task.name})`,
+        );
+      }
     }
 
     const updatedTask = await db.get(
