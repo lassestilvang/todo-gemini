@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { isPast, parseISO } from "date-fns";
+import { isPast, parseISO, isBefore, startOfToday } from "date-fns";
 import { Task } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
@@ -11,12 +11,23 @@ export function isOverdue(task: Task): boolean {
   if (task.completed) {
     return false;
   }
+
+  const today = startOfToday();
+
   if (task.deadline) {
-    return isPast(parseISO(task.deadline));
+    const deadlineDate = parseISO(task.deadline);
+    // If deadline is just a date (no time), use isBefore today
+    if (task.deadline.length <= 10) {
+      return isBefore(deadlineDate, today);
+    }
+    return isPast(deadlineDate);
   }
+
   if (task.date) {
-    return isPast(parseISO(task.date));
+    const taskDate = parseISO(task.date);
+    return isBefore(taskDate, today);
   }
+
   return false;
 }
 

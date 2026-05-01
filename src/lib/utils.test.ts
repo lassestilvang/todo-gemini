@@ -8,7 +8,7 @@ describe("cn", () => {
     expect(cn("class1", "", "class2")).toBe("class1 class2");
     expect(cn("class1", null, "class2")).toBe("class1 class2");
     expect(cn("class1", undefined, "class2")).toBe("class1 class2");
-    expect(cn("class1", { "class2": true, "class3": false })).toBe("class1 class2");
+    expect(cn("class1", { class2: true, class3: false })).toBe("class1 class2");
     expect(cn("class1", "class2 class3")).toBe("class1 class2 class3");
   });
 });
@@ -111,6 +111,27 @@ describe("isOverdue", () => {
       description: null,
       date: null,
       deadline: tomorrow.toISOString(),
+      reminder: null,
+      estimate: 0,
+      actualTime: null,
+      priority: "NONE",
+      completed: false,
+      recurring: null,
+      createdAt: "",
+      updatedAt: "",
+      listId: "list1",
+      parentId: null,
+    };
+    expect(isOverdue(task)).toBe(false);
+  });
+
+  test("should return false if task date is today", () => {
+    const task: Task = {
+      id: "1",
+      name: "Test Task",
+      description: null,
+      date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+      deadline: null,
       reminder: null,
       estimate: 0,
       actualTime: null,
