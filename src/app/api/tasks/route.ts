@@ -93,3 +93,30 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const completedOnly = searchParams.get("completed") === "true";
+
+    if (!completedOnly) {
+      return NextResponse.json(
+        {
+          error: "Only clearing completed tasks is supported via this endpoint",
+        },
+        { status: 400 },
+      );
+    }
+
+    const db = await getDb();
+    await db.run("DELETE FROM tasks WHERE completed = 1");
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("Tasks DELETE API error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
+}

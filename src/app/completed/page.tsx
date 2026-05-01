@@ -12,10 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowUpDown, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown, CheckCircle, Trash2 } from "lucide-react";
 
 export default function CompletedTasksPage() {
-  const { tasks, fetchTasks, isLoading, error } = useTaskStore();
+  const { tasks, fetchTasks, clearCompletedTasks, isLoading, error } =
+    useTaskStore();
   const { sortBy, setSortBy } = useSettingsStore();
 
   useEffect(() => {
@@ -25,7 +27,17 @@ export default function CompletedTasksPage() {
     fetchTasks(undefined, true);
   }, [fetchTasks]);
 
-  const completedTasks = tasks.filter(t => t.completed);
+  const handleClearAll = async () => {
+    if (
+      confirm(
+        "Are you sure you want to permanently delete ALL completed tasks?",
+      )
+    ) {
+      await clearCompletedTasks();
+    }
+  };
+
+  const completedTasks = tasks.filter((t) => t.completed);
   const sortedTasks = sortTasks(completedTasks, sortBy);
 
   if (error) {
@@ -72,6 +84,18 @@ export default function CompletedTasksPage() {
               </SelectContent>
             </Select>
           </div>
+          {completedTasks.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={handleClearAll}
+              disabled={isLoading}
+            >
+              <Trash2 className="w-3 h-3 mr-2" />
+              Clear All
+            </Button>
+          )}
         </div>
       </div>
 

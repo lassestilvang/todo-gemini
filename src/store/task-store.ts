@@ -30,6 +30,7 @@ interface TaskState {
   ) => Promise<void>;
   updateTask: (taskId: string, updatedTask: Partial<Task>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
+  clearCompletedTasks: () => Promise<void>;
   setError: (error: string | null) => void;
   fetchTaskById: (taskId: string) => Promise<TaskWithRelations | null>;
   _fetchTasksInternal: (url: string, errorMessage: string) => Promise<void>;
@@ -197,6 +198,30 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     } catch (err) {
       set({
         error: err instanceof Error ? err.message : "Failed to delete task",
+      });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  clearCompletedTasks: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch("/api/tasks?completed=true", {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to clear completed tasks");
+
+      set((state) => ({
+        tasks: state.tasks.filter((t) => !t.completed),
+        searchResults: state.searchResults.filter((t) => !t.completed),
+      }));
+      get().fetchCounts();
+    } catch (err) {
+      set({
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to clear completed tasks",
       });
     } finally {
       set({ isLoading: false });
