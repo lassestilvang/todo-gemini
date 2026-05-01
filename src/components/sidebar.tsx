@@ -140,24 +140,50 @@ const Sidebar = () => {
                 <li key={task.id} className="text-sm">
                   <Link
                     href={`/task/${task.id}`}
-                    className="hover:underline block truncate"
+                    className="hover:bg-muted p-1 rounded block truncate group"
                     onClick={() => {
                       setSearchQuery("");
                       clearSearchResults();
                     }}
                   >
-                    {highlightText(task.name, searchQuery).map((part, i) => (
-                      <span
-                        key={i}
-                        className={
-                          part.toLowerCase() === searchQuery.toLowerCase()
-                            ? "bg-yellow-500/30 text-yellow-600 font-bold"
-                            : ""
-                        }
-                      >
-                        {part}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate">
+                        {highlightText(task.name, searchQuery).map(
+                          (part, i) => (
+                            <span
+                              key={i}
+                              className={
+                                part.toLowerCase() === searchQuery.toLowerCase()
+                                  ? "bg-yellow-500/30 text-yellow-600 font-bold"
+                                  : ""
+                              }
+                            >
+                              {part}
+                            </span>
+                          ),
+                        )}
                       </span>
-                    ))}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {task.listName && (
+                        <span
+                          className="text-[10px] px-1 rounded text-white font-medium"
+                          style={{
+                            backgroundColor: task.listColor || "#a1a1aa",
+                          }}
+                        >
+                          {task.listName}
+                        </span>
+                      )}
+                      {task.date && (
+                        <span className="text-[10px] text-muted-foreground italic">
+                          {new Date(task.date).toLocaleDateString([], {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                 </li>
               ))}
