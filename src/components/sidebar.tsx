@@ -69,6 +69,7 @@ const Sidebar = () => {
   useKeyboardShortcut("g u", () => router.push("/upcoming"));
   useKeyboardShortcut("g i", () => router.push("/"));
   useKeyboardShortcut("g a", () => router.push("/all"));
+  useKeyboardShortcut("g c", () => router.push("/completed"));
 
   useEffect(() => {
     fetchLists();
@@ -199,7 +200,7 @@ const Sidebar = () => {
           <Filter className="mr-3 h-4 w-4" />
           <span>Filters & Labels</span>
         </Link>
-        <Link href="#" className="p-2 flex items-center rounded-md">
+        <Link href="/completed" className="p-2 flex items-center rounded-md">
           <CheckCircle className="mr-3 h-5 w-5" />
           <span>Completed</span>
         </Link>
