@@ -32,6 +32,7 @@ interface TaskState {
   deleteTask: (taskId: string) => Promise<void>;
   setError: (error: string | null) => void;
   fetchTaskById: (taskId: string) => Promise<TaskWithRelations | null>;
+  _fetchTasksInternal: (url: string, errorMessage: string) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -41,81 +42,43 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   isLoading: false,
   error: null,
   fetchTasks: async (listId, showCompleted) => {
-    set({ isLoading: true, error: null });
-    try {
-      let url = listId ? `/api/tasks?listId=${listId}` : "/api/tasks";
-      if (showCompleted !== undefined) {
-        url += `${listId ? "&" : "?"}showCompleted=${showCompleted}`;
-      }
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch tasks");
-      const tasks = await response.json();
-      set({ tasks });
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : "Failed to fetch tasks",
-      });
-    } finally {
-      set({ isLoading: false });
+    let url = listId ? `/api/tasks?listId=${listId}` : "/api/tasks";
+    if (showCompleted !== undefined) {
+      url += `${listId ? "&" : "?"}showCompleted=${showCompleted}`;
     }
+    await get()._fetchTasksInternal(url, "Failed to fetch tasks");
   },
   fetchTodayTasks: async (showCompleted) => {
-    set({ isLoading: true, error: null });
-    try {
-      let url = "/api/tasks/today";
-      if (showCompleted !== undefined) {
-        url += `?showCompleted=${showCompleted}`;
-      }
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch today's tasks");
-      const tasks = await response.json();
-      set({ tasks });
-    } catch (err) {
-      set({
-        error:
-          err instanceof Error ? err.message : "Failed to fetch today's tasks",
-      });
-    } finally {
-      set({ isLoading: false });
+    let url = "/api/tasks/today";
+    if (showCompleted !== undefined) {
+      url += `?showCompleted=${showCompleted}`;
     }
+    await get()._fetchTasksInternal(url, "Failed to fetch today's tasks");
   },
   fetchNext7DaysTasks: async (showCompleted) => {
-    set({ isLoading: true, error: null });
-    try {
-      let url = "/api/tasks/next-7-days";
-      if (showCompleted !== undefined) {
-        url += `?showCompleted=${showCompleted}`;
-      }
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch next 7 days tasks");
-      const tasks = await response.json();
-      set({ tasks });
-    } catch (err) {
-      set({
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to fetch next 7 days tasks",
-      });
-    } finally {
-      set({ isLoading: false });
+    let url = "/api/tasks/next-7-days";
+    if (showCompleted !== undefined) {
+      url += `?showCompleted=${showCompleted}`;
     }
+    await get()._fetchTasksInternal(url, "Failed to fetch next 7 days tasks");
   },
   fetchUpcomingTasks: async (showCompleted) => {
+    let url = "/api/tasks/upcoming";
+    if (showCompleted !== undefined) {
+      url += `?showCompleted=${showCompleted}`;
+    }
+    await get()._fetchTasksInternal(url, "Failed to fetch upcoming tasks");
+  },
+  _fetchTasksInternal: async (url: string, errorMessage: string) => {
     set({ isLoading: true, error: null });
     try {
-      let url = "/api/tasks/upcoming";
-      if (showCompleted !== undefined) {
-        url += `?showCompleted=${showCompleted}`;
-      }
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch upcoming tasks");
+      if (!response.ok) throw new Error(errorMessage);
       const tasks = await response.json();
       set({ tasks });
     } catch (err) {
       set({
-        error:
-          err instanceof Error ? err.message : "Failed to fetch upcoming tasks",
+        error: err instanceof Error ? err.message : errorMessage,
       });
     } finally {
       set({ isLoading: false });
