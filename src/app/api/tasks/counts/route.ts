@@ -7,22 +7,23 @@ export async function GET() {
     const db = await getDb();
     const today = format(new Date(), "yyyy-MM-dd");
 
-    const todayCount = await db.get(
-      "SELECT COUNT(*) as count FROM tasks WHERE (date = ? OR (date < ? AND completed = 0)) AND completed = 0 AND parentId IS NULL",
+    const result = await db.get(
+      `
+      SELECT
+        COUNT(CASE WHEN (date = ? OR (date < ? AND completed = 0)) AND completed = 0 AND parentId IS NULL THEN 1 END) as today,
+        COUNT(CASE WHEN l.name = 'Inbox' AND t.completed = 0 AND t.parentId IS NULL THEN 1 END) as inbox,
+        COUNT(CASE WHEN t.completed = 0 AND t.parentId IS NULL THEN 1 END) as allCount
+      FROM tasks t
+      LEFT JOIN lists l ON t.listId = l.id
+    `,
       today,
       today,
-    );
-    const inboxCount = await db.get(
-      "SELECT COUNT(*) as count FROM tasks t JOIN lists l ON t.listId = l.id WHERE l.name = 'Inbox' AND t.completed = 0 AND t.parentId IS NULL",
-    );
-    const allCount = await db.get(
-      "SELECT COUNT(*) as count FROM tasks WHERE completed = 0 AND parentId IS NULL",
     );
 
     return NextResponse.json({
-      today: todayCount.count,
-      inbox: inboxCount.count,
-      all: allCount.count,
+      today: result.today,
+      inbox: result.inbox,
+      all: result.allCount,
     });
   } catch (error) {
     console.error("Counts API error:", error);
